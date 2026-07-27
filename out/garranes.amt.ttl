@@ -1,0 +1,34 @@
+@prefix amt: <http://academic-meta-tool.xyz/vocab#> .
+@prefix data: <http://data.ogham.link/amt/> .
+@prefix ogham: <http://ontology.ogham.link/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:agent_OGHAM_NW a prov:Agent ;
+    rdfs:label "OG(H)AM edition (NW)" .
+
+data:reading_81_OGHAM_NW rdfs:label "CASSITTAS MAQI MUCOI CALLITI" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_NW .
+
+data:stone_81 rdfs:label "An Garrán | Garranes (CIIC 81)" ;
+    amt:instanceOf ogham:OghamStone .
+
+ogham:hasReading a amt:Role ;
+    rdfs:label "has reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading .
+
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" .
+
+ogham:Reading a amt:Concept ;
+    rdfs:label "Reading" .
+
+[] amt:weight 1.0000 ;
+    rdf:object data:reading_81_OGHAM_NW ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_81 .
+

@@ -1,0 +1,46 @@
+@prefix amt: <http://academic-meta-tool.xyz/vocab#> .
+@prefix data: <http://data.ogham.link/amt/> .
+@prefix ogham: <http://ontology.ogham.link/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:agent_MAC1945 a prov:Agent ;
+    rdfs:label "Macalister 1945" .
+
+data:agent_OGHAM_NW a prov:Agent ;
+    rdfs:label "OG(H)AM edition (NW)" .
+
+data:reading_55_MAC1945 rdfs:label "ANM SAINA MAQ OGALA MUCOI TEMOCA" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_MAC1945 .
+
+data:reading_55_OGHAM_NW rdfs:label ".. ? ..TETA" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_NW .
+
+data:stone_55 rdfs:label "An Com Liath Thoir | Coomleagh East (CIIC 55)" ;
+    amt:instanceOf ogham:OghamStone .
+
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" .
+
+ogham:hasReading a amt:Role ;
+    rdfs:label "has reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading .
+
+ogham:Reading a amt:Concept ;
+    rdfs:label "Reading" .
+
+[] amt:weight 0.3846 ;
+    rdf:object data:reading_55_OGHAM_NW ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_55 .
+
+[] amt:weight 0.6154 ;
+    rdf:object data:reading_55_MAC1945 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_55 .
+

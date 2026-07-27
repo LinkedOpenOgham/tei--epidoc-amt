@@ -1,0 +1,82 @@
+@prefix amt: <http://academic-meta-tool.xyz/vocab#> .
+@prefix data: <http://data.ogham.link/amt/> .
+@prefix ogham: <http://ontology.ogham.link/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:agent_MAC1902 a prov:Agent ;
+    rdfs:label "Macalister 1902" .
+
+data:agent_MAC1945 a prov:Agent ;
+    rdfs:label "Macalister 1945" .
+
+data:agent_OGHAM_KF a prov:Agent ;
+    rdfs:label "OG(H)AM edition (KF)" .
+
+data:agent_RHY1899 a prov:Agent ;
+    rdfs:label "Rhys 1899" .
+
+data:agent_RHY1901 a prov:Agent ;
+    rdfs:label "Rhys 1901" .
+
+data:reading_506_MAC1902 rdfs:label "VICULA MAQ COMGINI" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_MAC1902 .
+
+data:reading_506_MAC1945 rdfs:label "VICULA MAQ CUGINI" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_MAC1945 .
+
+data:reading_506_OGHAM_KF rdfs:label "[---]MAQ[---]COGIN[---]" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_KF .
+
+data:reading_506_RHY1899 rdfs:label "MAQICAGILEB" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_RHY1899 .
+
+data:reading_506_RHY1901 rdfs:label "OGMA MAQI TIGERNI" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_RHY1901 .
+
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" .
+
+data:stone_506 rdfs:label "Gigha 1 (CIIC 506)" ;
+    amt:instanceOf ogham:OghamStone .
+
+ogham:hasReading a amt:Role ;
+    rdfs:label "has reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading .
+
+ogham:Reading a amt:Concept ;
+    rdfs:label "Reading" .
+
+[] amt:weight 0.1818 ;
+    rdf:object data:reading_506_OGHAM_KF ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_506 .
+
+[] amt:weight 0.2727 ;
+    rdf:object data:reading_506_MAC1945 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_506 .
+
+[] amt:weight 0.2727 ;
+    rdf:object data:reading_506_MAC1902 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_506 .
+
+[] amt:weight 0.0909 ;
+    rdf:object data:reading_506_RHY1901 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_506 .
+
+[] amt:weight 0.1818 ;
+    rdf:object data:reading_506_RHY1899 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_506 .
+
