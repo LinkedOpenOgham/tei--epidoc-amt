@@ -1,4 +1,4 @@
-# tei--epidoc-amt
+# Epidoc AMT - Ogham Prototype
 
 Convert TEI/EpiDoc editions of ogham stones into **Academic Meta Tool (AMT)**
 Turtle, so that competing scholarly readings become **weighted, reified
