@@ -1,16 +1,40 @@
 @prefix amt: <http://academic-meta-tool.xyz/vocab#> .
 @prefix data: <http://data.ogham.link/amt/> .
+@prefix fw: <http://w3id.org/fw_ontology/> .
 @prefix ogham: <http://ontology.ogham.link/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:stmt_55_MAC1945 amt:weight 0.6154 ;
+    fw:derivedFrom data:evidence_55_MAC1945 ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:Uncertainty ;
+    rdf:object data:reading_55_MAC1945 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_55 .
+
+data:stmt_55_OGHAM_NW amt:weight 0.3846 ;
+    fw:derivedFrom data:evidence_55_OGHAM_NW ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:FuzzinessWobbliness ;
+    rdf:object data:reading_55_OGHAM_NW ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:stone_55 .
 
 data:agent_MAC1945 a prov:Agent ;
     rdfs:label "Macalister 1945" .
 
 data:agent_OGHAM_NW a prov:Agent ;
     rdfs:label "OG(H)AM edition (NW)" .
+
+data:evidence_55_MAC1945 a fw:TextEvidence ;
+    fw:sourceString "ANM SAINA MAQ OGALA MUCOI TEMOCA" .
+
+data:evidence_55_OGHAM_NW a fw:TextEvidence ;
+    fw:sourceString ".. ? ..TETA" .
 
 data:reading_55_MAC1945 rdfs:label "ANM SAINA MAQ OGALA MUCOI TEMOCA" ;
     amt:instanceOf ogham:Reading ;
@@ -23,24 +47,23 @@ data:reading_55_OGHAM_NW rdfs:label ".. ? ..TETA" ;
 data:stone_55 rdfs:label "An Com Liath Thoir | Coomleagh East (CIIC 55)" ;
     amt:instanceOf ogham:OghamStone .
 
+ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
+    rdfs:label "confidence times agreement rule"@en ;
+    fw:formula "c(r) * a(r) / sum(c * a)" ;
+    fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> ;
+    rdfs:comment "Weight of a reading among the readings of one stone: the reading confidence c(r) (from the doubt markup of the reading) times the tradition agreement a(r) (the share of readings that cluster with it), divided by the sum of these products over all readings of the stone. Four decimals."@en .
+
 ogham:OghamStone a amt:Concept ;
-    rdfs:label "Ogham stone" .
+    rdfs:label "Ogham stone" ;
+    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number." .
 
 ogham:hasReading a amt:Role ;
     rdfs:label "has reading" ;
     rdfs:domain ogham:OghamStone ;
-    rdfs:range ogham:Reading .
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way by an editor. Each statement carries the weight of that reading among the readings of the stone." ;
+    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional." .
 
 ogham:Reading a amt:Concept ;
-    rdfs:label "Reading" .
-
-[] amt:weight 0.3846 ;
-    rdf:object data:reading_55_OGHAM_NW ;
-    rdf:predicate ogham:hasReading ;
-    rdf:subject data:stone_55 .
-
-[] amt:weight 0.6154 ;
-    rdf:object data:reading_55_MAC1945 ;
-    rdf:predicate ogham:hasReading ;
-    rdf:subject data:stone_55 .
-
+    rdfs:label "Reading" ;
+    rdfs:comment "One transliteration of the inscription: either the current edition of the OG(H)AM team or a historical reading from the apparatus of the EpiDoc file." .

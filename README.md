@@ -1,4 +1,4 @@
-# tei--epidoc-amt
+# TEI/Epidoc AMT - Ogham Prototype
 
 Convert TEI/EpiDoc editions of ogham stones into **Academic Meta Tool (AMT)**
 Turtle, so that competing scholarly readings become **weighted, reified
@@ -22,6 +22,10 @@ For each stone it collects the competing readings and emits an AMT graph:
 - weighted edges — one reified quadruple (`rdf:subject` / `rdf:predicate` /
   `rdf:object` + `amt:weight`) per reading
 - provenance — each reading `prov:wasAttributedTo` its editor
+- hextuple (since 0.2.0) — each weighted statement also names the **type** of
+  doubt (`fw:hasType`), the **method** that produced the weight (`fw:hasMethod`)
+  and the **evidence** it was derived from (`fw:derivedFrom`), as in
+  AMT.engine 0.6.0
 
 A *reading* is either the **current edition** (the `<div type="edition">`
 transliteration, attributed to the OG(H)AM editor) or a **historical**
@@ -42,16 +46,26 @@ Four stones form a deliberate **spectrum of doubt**:
 
 ```
 tei--epidoc-amt/
-├── data/                      # inputs (EpiDoc XML)
-│   ├── S-ARL-001.xml          # Gigha 1 (CIIC 506)
-│   ├── I-COR-001.xml          # Coomleagh East (CIIC 55)
-│   ├── I-COR-030.xml          # Garranes (CIIC 81)
-│   └── I-KER-020.xml          # Ballinrannig 6 (CIIC 153)
+├── data/                      # inputs (EpiDoc XML), unchanged
+├── ontology/
+│   └── ogham-amt.ttl          # the domain model: 2 concepts, 1 role, 1 method
 ├── out/                       # generated outputs
 │   ├── README.md              # extraction, scores, c, AMT modelling (generated)
 │   └── *.amt.ttl              # one AMT graph per stone (generated)
+├── docs/                      # GitHub Pages: model, vocabulary, weights, stones, run
+│   ├── _config.yml, _layouts/, assets/    # Jekyll shell and logo (sources)
+│   └── *.md, diagrams/        # generated
 ├── py/
-│   └── main.py                # single entry point:  python py/main.py
+│   ├── step_convert.py        # EpiDoc -> AMT Turtle
+│   ├── step_diagrams.py       # five figures in the colours of the project logo
+│   ├── step_docs.py           # the documentation pages
+│   ├── step_tests.py, step_check.py
+│   ├── ogham_amt_utils.py     # release, paths, namespaces
+│   └── main.py                # compatibility entry point (calls step_convert)
+├── tests/test_convert.py
+├── main.py                    # the single entry point:  python main.py
+├── PRIMER.md                  # work plan (German)
+├── CHANGELOG.md, CITATION.cff, LICENSE
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -65,27 +79,70 @@ Python 3.10+ and the libraries in `requirements.txt`:
 pip install -r requirements.txt
 ```
 
-`rdflib` builds the graph, `lxml` parses the EpiDoc XML, `pyshacl` is optional
-(only for the validation step below).
+`rdflib` builds the graph, `lxml` parses the EpiDoc XML, `matplotlib` draws the
+diagrams, `pyshacl` is optional (only for the SHACL option below).
 
 ## Usage
 
 Run from the repository root:
 
 ```
-python py/main.py
+python main.py
 ```
 
-This processes all four stones in the `STONES` list and writes one
-`out/<stone>.amt.ttl` per stone, plus `out/README.md`. Single-file mode and optional SHACL check:
+This converts the four stones (`out/<stone>.amt.ttl` and `out/README.md`), draws
+the diagrams, writes the documentation into `docs/` and runs the tests. The
+build has no clock in it: a second run changes no file.
+
+```
+python main.py --list
+python main.py --only convert
+python main.py --only check
+```
+
+`--only check` is the one step that needs the network. It fetches the
+[amt-runner](https://github.com/alpaca-fair-framework/amt-runner), which in turn
+fetches the AMT engine, and runs `--check-only` on every graph: validation
+against the AMT shapes, loading, diagnostics. Nothing is written outside `build/`.
+
+The earlier entry point still works:
 
 ```
 python py/main.py --input data/S-ARL-001.xml --output out/gigha1.amt.ttl
 python py/main.py --shapes amt-shapes.ttl --ontology amt.ttl   # validate all outputs
 ```
 
-The two SHACL files ship with `n4o-rse/amt-engine`
-(`ontology/amt-shapes.ttl`, `ontology/amt.ttl`).
+The two SHACL files ship with the AMT engine
+([`alpaca-fair-framework/amt-engine`](https://github.com/alpaca-fair-framework/amt-engine),
+`ontology/amt-shapes.ttl`, `ontology/amt.ttl`).
+
+## Documentation
+
+The pages in `docs/` (model, vocabulary, weights, every reading of the four
+stones, how to run the check) are served by GitHub Pages when *Settings, Pages*
+points at the `/docs` folder of the main branch. They are written by
+`python main.py --only docs` from the ontology and the data.
+
+## The hextuple annotation
+
+One weighted statement, as written to `out/gigha1.amt.ttl`:
+
+```turtle
+data:stmt_506_MAC1945
+    rdf:subject    data:stone_506 ;
+    rdf:predicate  ogham:hasReading ;
+    rdf:object     data:reading_506_MAC1945 ;
+    amt:weight     0.2727 ;
+    fw:hasType     fw:Uncertainty ;
+    fw:hasMethod   ogham:ConfidenceAgreementRule ;
+    fw:derivedFrom data:evidence_506_MAC1945 .
+```
+
+The type says which factor lowered the weight: c < 1 gives `fw:Vagueness`, a < 1
+gives `fw:Uncertainty`, both give `fw:FuzzinessWobbliness`, neither writes no
+type. The quadruple core is unchanged against release 0.1.0, so existing
+consumers read the same weights. Statements are IRIs, not blank nodes, so the
+Turtle is deterministic.
 
 ## The weighting rule (v1)
 
@@ -108,7 +165,7 @@ amt:weight = raw(r) / Σ raw(r)      # normalised over the alternatives, Σ = 1
 
 The normalised weights form a belief distribution and are the natural bridge to
 CIDOC CRM's argumentation model **CRMinf (I2 Belief)**. All constants live at the
-top of `py/main.py`.
+top of `py/step_convert.py`.
 
 Example — Gigha 1 (edition + four historical readings):
 
@@ -145,7 +202,7 @@ Florian Thiery. Code licensed under the **MIT License** (see `LICENSE`).
 
 ## TODO (to fill before publishing)
 
-- Zenodo DOI and `CITATION.cff`
+- Zenodo DOI (`CITATION.cff` is in place; add the DOI after the first release)
 - Data licence / attribution for the EpiDoc input (OG(H)AM project)
 - ORCID / affiliation
 - Replace the c(r) proxy for historical readings with per-character certainty

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+<link rel="icon" type="image/png" href="{{ '/assets/favicon.png' | relative_url }}">
+<style>
+  /* Colours of the Linked Open Ogham logo: dark #004c55, bright #0090a2 */
+  :root { --dark:#004c55; --bright:#0090a2; --tint:#d9eef1; --ink:#12262a; --muted:#3f6168; --hair:#cfe3e6; --band:#f2f9fa; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         line-height:1.65; color:var(--ink); margin:0; }
+  header.site { background:var(--dark); color:#fff; }
+  header.site .in { max-width:56rem; margin:0 auto; padding:.9rem 1.25rem; display:flex; align-items:center; gap:1rem; }
+  header.site img { height:3.2rem; width:auto; background:#fff; border-radius:6px; padding:.2rem; }
+  header.site .name { font-size:1.15rem; font-weight:600; line-height:1.2; }
+  header.site .name small { display:block; font-weight:400; opacity:.8; font-size:.8rem; }
+  nav.top { background:var(--bright); }
+  nav.top .in { max-width:56rem; margin:0 auto; padding:.55rem 1.25rem; font-size:.92rem; }
+  nav.top a { color:#fff; margin-right:1.1rem; text-decoration:none; }
+  nav.top a:hover { text-decoration:underline; }
+  main { max-width:56rem; margin:0 auto; padding:1rem 1.25rem 6rem; }
+  a { color:var(--bright); } a:hover { color:var(--dark); }
+  h1,h2,h3 { line-height:1.25; margin-top:2.2rem; font-weight:600; color:var(--dark); }
+  h1 { font-size:1.8rem; margin-top:1.5rem; } h2 { font-size:1.3rem; } h3 { font-size:1.05rem; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.88em; }
+  pre { background:var(--band); border:1px solid var(--hair); border-radius:6px; padding:.9rem 1rem; overflow-x:auto; }
+  :not(pre) > code { background:var(--band); padding:.12em .35em; border-radius:4px; }
+  table { border-collapse:collapse; width:100%; margin:1.2rem 0; }
+  th,td { border:1px solid var(--hair); padding:.45rem .6rem; text-align:left; vertical-align:top; font-size:.92rem; }
+  th { background:var(--tint); color:var(--dark); font-weight:600; }
+  blockquote { margin:1.2rem 0; padding:.6rem 1rem; background:var(--band); border-left:4px solid var(--bright); }
+  blockquote p { margin:.3rem 0; }
+  img { max-width:100%; height:auto; }
+  footer { max-width:56rem; margin:0 auto; padding:0 1.25rem 3rem; font-size:.85rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<header class="site"><div class="in">
+  <a href="{{ '/' | relative_url }}"><img src="{{ '/assets/LinkedOpenOgham_Logo.svg' | relative_url }}" alt="Linked Open Ogham"></a>
+  <div class="name">Linked Open Ogham AMT<small>Competing readings as weighted statements</small></div>
+</div></header>
+<nav class="top"><div class="in">
+  <a href="{{ '/' | relative_url }}">Overview</a>
+  <a href="{{ '/model.html' | relative_url }}">Model</a>
+  <a href="{{ '/vocabulary.html' | relative_url }}">Vocabulary</a>
+  <a href="{{ '/weights.html' | relative_url }}">Weights</a>
+  <a href="{{ '/stones.html' | relative_url }}">Stones</a>
+  <a href="{{ '/run.html' | relative_url }}">Run</a>
+</div></nav>
+<main>
+{{ content }}
+</main>
+<footer>Code MIT licensed. Logo: Linked Open Ogham. <a href="https://github.com/LinkedOpenOgham/tei--epidoc-amt">Repository</a></footer>
+</body>
+</html>

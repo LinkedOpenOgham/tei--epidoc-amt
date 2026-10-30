@@ -1,0 +1,8 @@
+title: Linked Open Ogham AMT
+description: Competing readings of ogham stones as weighted statements in the Academic Meta Tool (AMT), with the type of doubt from the Fuzziness-Wobbliness ontology
+markdown: kramdown
+kramdown:
+  input: GFM
+defaults:
+  - scope: { path: "" }
+    values: { layout: default }

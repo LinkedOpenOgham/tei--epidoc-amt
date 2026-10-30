@@ -1,3 +1,6 @@
 rdflib>=7.0
 lxml>=5.0
-pyshacl>=0.26   # optional, only needed for --validate
+# The diagrams are written byte-identically only for the same matplotlib minor version
+# (glyph outlines enter the SVG as paths); 3.11 is the version the committed figures come from.
+matplotlib>=3.9
+pyshacl>=0.26   # optional, only needed for --shapes / --ontology

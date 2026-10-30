@@ -1,10 +1,10 @@
 # `out/` — extracted doubt and its AMT modelling
 
-> **Generated file** — produced by `python py/main.py`. Do not edit by hand; it adapts to the EpiDoc inputs and to the weighting constants in `py/main.py`.
+> **Generated file** — produced by `python main.py` (step `convert`). Do not edit by hand; it adapts to the EpiDoc inputs and to the weighting constants in `py/step_convert.py`.
 
 ## 1. How doubt is extracted from an inscription
 
-Each competing reading of a stone becomes one weighted edge. Two kinds of reading are read out of the EpiDoc file:
+Each competing reading of a stone becomes one weighted statement. Two kinds of reading are read out of the EpiDoc file:
 
 - the **current edition** — the `<div type="edition">` transliteration; and
 - every active **historical reading** in the apparatus — `<rdg>` (readings commented out in the XML are ignored).
@@ -32,38 +32,56 @@ c = 1 − (0.5·#unclear + 0.7·#supplied + 1.0·#gap) / length
 c = 1 − (editor-marked chars) / length
 ```
 
-The **tradition agreement** `a` = fraction of editors whose reading clusters with r (string similarity ≥ 0.6). The edge weight is the normalised product
+The **tradition agreement** `a` = fraction of readings that cluster with r (string similarity ≥ 0.6). The weight is the normalised product
 
 ```
 amt:weight(r) = c(r)·a(r) / Σ c·a          (Σ over the alternatives = 1)
 ```
 
-## 3. How it is modelled with AMT
+## 3. How the FW type is set
 
-Every reading is an `amt:Concept` individual (`amt:instanceOf ogham:Reading`); the stone `hasReading` each of them as a **reified quadruple** carrying the `amt:weight`; each reading is `prov:wasAttributedTo` its editor. The normalised weights are a belief distribution, bridged to CIDOC CRM's argumentation model **CRMinf (I2 Belief)**. Literal shape:
+The type names the factor that pulled the raw weight below 1. It does not change the weight.
+
+| c < 1 (imprecise reading) | a < 1 (other readings disagree) | `fw:hasType` |
+|---|---|---|
+| no | no | none written; AMT reads a statement without type as `fw:Vagueness` |
+| yes | no | `fw:Vagueness` |
+| no | yes | `fw:Uncertainty` |
+| yes | yes | `fw:FuzzinessWobbliness` |
+
+## 4. How it is modelled with AMT
+
+Every reading is an `amt:Concept` individual (`amt:instanceOf ogham:Reading`); the stone `hasReading` each of them as a **hextuple**: a reified statement (`rdf:subject`, `rdf:predicate`, `rdf:object`) carrying `amt:weight`, `fw:hasType` and `fw:hasMethod`, with the reading string as `fw:TextEvidence` (`fw:derivedFrom`). Each reading is `prov:wasAttributedTo` its editor. The normalised weights are a belief distribution, bridged to CIDOC CRM's argumentation model **CRMinf (I2 Belief)**. Literal shape, taken from the data:
 
 ```turtle
-[] rdf:subject   data:stone_506 ;
-   rdf:predicate ogham:hasReading ;
-   rdf:object    data:reading_506_MAC1945 ;
-   amt:weight    "0.2727"^^xsd:decimal .
+data:stmt_506_MAC1902
+    rdf:subject    data:stone_506 ;
+    rdf:predicate  ogham:hasReading ;
+    rdf:object     data:reading_506_MAC1902 ;
+    amt:weight     0.2727 ;
+    fw:hasType     fw:Uncertainty ;
+    fw:hasMethod   ogham:ConfidenceAgreementRule ;
+    fw:derivedFrom data:evidence_506_MAC1902 .
+
+data:evidence_506_MAC1902 a fw:TextEvidence ;
+    fw:sourceString "VICULA MAQ COMGINI" .
 ```
 
-The reasoning engine (`n4o-rse/amt-engine`) then combines these weights with the `amt:ProductLogic` operator when it applies inference axioms.
+The graphs contain no axioms. The reasoning engine ([`alpaca-fair-framework/amt-engine`](https://github.com/alpaca-fair-framework/amt-engine)) validates and exports them; it has nothing to derive until axioms are added, and would then combine weights with the logic of the axiom (for example `amt:ProductLogic`).
 
-## 4. Per stone
+## 5. Per stone
 
 ### Gigha 1 (CIIC 506)
 
 `gigha1.amt.ttl` — 5 reading(s): 1 edition + 4 historical.
 
-| reading | editor | extracted doubt | c | a | amt:weight |
-|---|---|---|---|---|---|
-| VICULA MAQ COMGINI | Macalister 1902 | proxy: 0 editor-marked char(s) of 16 | 1.00 | 0.60 | **0.2727** |
-| VICULA MAQ CUGINI | Macalister 1945 | proxy: 0 editor-marked char(s) of 15 | 1.00 | 0.60 | **0.2727** |
-| [---]MAQ[---]COGIN[---] | OG(H)AM edition (KF) | 2× `<unclear>`, 0× `<supplied>`, 3× `<gap>` | 0.50 | 0.80 | **0.1818** |
-| MAQICAGILEB | Rhys 1899 | proxy: 0 editor-marked char(s) of 11 | 1.00 | 0.40 | **0.1818** |
-| OGMA MAQI TIGERNI | Rhys 1901 | proxy: 0 editor-marked char(s) of 15 | 1.00 | 0.20 | **0.0909** |
+| reading | editor | extracted doubt | c | a | amt:weight | type |
+|---|---|---|---|---|---|---|
+| VICULA MAQ COMGINI | Macalister 1902 | proxy: 0 editor-marked char(s) of 16 | 1.00 | 0.60 | **0.2727** | U |
+| VICULA MAQ CUGINI | Macalister 1945 | proxy: 0 editor-marked char(s) of 15 | 1.00 | 0.60 | **0.2727** | U |
+| [---]MAQ[---]COGIN[---] | OG(H)AM edition (KF) | 2× `<unclear>`, 0× `<supplied>`, 3× `<gap>` | 0.50 | 0.80 | **0.1818** | FW |
+| MAQICAGILEB | Rhys 1899 | proxy: 0 editor-marked char(s) of 11 | 1.00 | 0.40 | **0.1818** | U |
+| OGMA MAQI TIGERNI | Rhys 1901 | proxy: 0 editor-marked char(s) of 15 | 1.00 | 0.20 | **0.0909** | U |
 
 *c per reading:*
 
@@ -73,7 +91,7 @@ The reasoning engine (`n4o-rse/amt-engine`) then combines these weights with the
 - Rhys 1899: c = 1 − 0 / 11 = **1.00**
 - Rhys 1901: c = 1 − 0 / 15 = **1.00**
 
-*AMT edges (stone → reading @ weight):*
+*AMT statements (stone → reading @ weight):*
 
 - `stone_506` —`hasReading`→ *Macalister 1902* · **weight 0.2727**
 - `stone_506` —`hasReading`→ *Macalister 1945* · **weight 0.2727**
@@ -85,17 +103,17 @@ The reasoning engine (`n4o-rse/amt-engine`) then combines these weights with the
 
 `coomleagh-east.amt.ttl` — 2 reading(s): 1 edition + 1 historical.
 
-| reading | editor | extracted doubt | c | a | amt:weight |
-|---|---|---|---|---|---|
-| ANM SAINA MAQ OGALA MUCOI TEMOCA | Macalister 1945 | proxy: 0 editor-marked char(s) of 27 | 1.00 | 0.50 | **0.6154** |
-| .. ? ..TETA | OG(H)AM edition (NW) | 1× `<unclear>`, 0× `<supplied>`, 1× `<gap>` | 0.62 | 0.50 | **0.3846** |
+| reading | editor | extracted doubt | c | a | amt:weight | type |
+|---|---|---|---|---|---|---|
+| ANM SAINA MAQ OGALA MUCOI TEMOCA | Macalister 1945 | proxy: 0 editor-marked char(s) of 27 | 1.00 | 0.50 | **0.6154** | U |
+| .. ? ..TETA | OG(H)AM edition (NW) | 1× `<unclear>`, 0× `<supplied>`, 1× `<gap>` | 0.62 | 0.50 | **0.3846** | FW |
 
 *c per reading:*
 
 - Macalister 1945: c = 1 − 0 / 27 = **1.00**
 - OG(H)AM edition (NW): c = 1 − (0.5·1 + 0.7·0 + 1.0·1) / 4 = **0.62**
 
-*AMT edges (stone → reading @ weight):*
+*AMT statements (stone → reading @ weight):*
 
 - `stone_55` —`hasReading`→ *Macalister 1945* · **weight 0.6154**
 - `stone_55` —`hasReading`→ *OG(H)AM edition (NW)* · **weight 0.3846**
@@ -104,15 +122,15 @@ The reasoning engine (`n4o-rse/amt-engine`) then combines these weights with the
 
 `garranes.amt.ttl` — 1 reading(s): 1 edition + 0 historical.
 
-| reading | editor | extracted doubt | c | a | amt:weight |
-|---|---|---|---|---|---|
-| CASSITTAS MAQI MUCOI CALLITI | OG(H)AM edition (NW) | 0× `<unclear>`, 3× `<supplied>`, 0× `<gap>` | 0.92 | 1.00 | **1.0000** |
+| reading | editor | extracted doubt | c | a | amt:weight | type |
+|---|---|---|---|---|---|---|
+| CASSITTAS MAQI MUCOI CALLITI | OG(H)AM edition (NW) | 0× `<unclear>`, 3× `<supplied>`, 0× `<gap>` | 0.92 | 1.00 | **1.0000** | V |
 
 *c per reading:*
 
 - OG(H)AM edition (NW): c = 1 − (0.5·0 + 0.7·3 + 1.0·0) / 25 = **0.92**
 
-*AMT edges (stone → reading @ weight):*
+*AMT statements (stone → reading @ weight):*
 
 - `stone_81` —`hasReading`→ *OG(H)AM edition (NW)* · **weight 1.0000**
 
@@ -120,15 +138,16 @@ The reasoning engine (`n4o-rse/amt-engine`) then combines these weights with the
 
 `ballinrannig6.amt.ttl` — 1 reading(s): 1 edition + 0 historical.
 
-| reading | editor | extracted doubt | c | a | amt:weight |
-|---|---|---|---|---|---|
-| CCICAMINIvac. MAQQ[/I] C[A]TTINI | OG(H)AM edition (NW) | 0× `<unclear>`, 0× `<supplied>`, 0× `<gap>` | 1.00 | 1.00 | **1.0000** |
+| reading | editor | extracted doubt | c | a | amt:weight | type |
+|---|---|---|---|---|---|---|
+| CCICAMINIvac. MAQQ[/I] C[A]TTINI | OG(H)AM edition (NW) | 0× `<unclear>`, 0× `<supplied>`, 0× `<gap>` | 1.00 | 1.00 | **1.0000** | - |
 
 *c per reading:*
 
 - OG(H)AM edition (NW): c = 1 − (0.5·0 + 0.7·0 + 1.0·0) / 24 = **1.00**
 
-*AMT edges (stone → reading @ weight):*
+*AMT statements (stone → reading @ weight):*
 
 - `stone_153` —`hasReading`→ *OG(H)AM edition (NW)* · **weight 1.0000**
 
+*Type: V = `fw:Vagueness`, U = `fw:Uncertainty`, FW = `fw:FuzzinessWobbliness`, `-` = no type written.*

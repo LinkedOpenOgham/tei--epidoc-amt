@@ -14,3 +14,10 @@ env/
 Thumbs.db
 .vscode/
 .idea/
+
+# Scratch of python main.py --only check (runner clone, report)
+build/
+
+# Local preview of the GitHub Pages site
+docs/_site/
+docs/.jekyll-cache/

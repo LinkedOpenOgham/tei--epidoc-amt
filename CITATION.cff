@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "tei--epidoc-amt: competing readings of ogham stones as weighted AMT statements"
+version: 0.2.0
+date-released: 2026-10-30
+license: MIT
+repository-code: "https://github.com/LinkedOpenOgham/tei--epidoc-amt"
+authors:
+  - family-names: Thiery
+    given-names: Florian
+keywords:
+  - ogham
+  - EpiDoc
+  - Academic Meta Tool
+  - Linked Data
+  - uncertainty

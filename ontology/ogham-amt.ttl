@@ -1,0 +1,49 @@
+@prefix amt:  <http://academic-meta-tool.xyz/vocab#> .
+@prefix fw:   <http://w3id.org/fw_ontology/> .
+@prefix ogham: <http://ontology.ogham.link/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# =============================================================================
+# Domain model of tei--epidoc-amt in the AMT vocabulary
+# =============================================================================
+#
+# One source of truth. py/step_convert.py copies these triples into every
+# out/*.amt.ttl, so that each output file is self-contained for the AMT runner;
+# py/step_docs.py reads the definitions below to write docs/model.html.
+#
+# Two concepts, one role, one method. There are no axioms: the graphs carry
+# weighted statements only (see the page "Run" for what that means for the
+# engine).
+# =============================================================================
+
+# ── Concepts ────────────────────────────────────────────────────────────────
+
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" ;
+    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number." .
+
+ogham:Reading a amt:Concept ;
+    rdfs:label "Reading" ;
+    rdfs:comment "One transliteration of the inscription: either the current edition of the OG(H)AM team or a historical reading from the apparatus of the EpiDoc file." .
+
+# ── Role ────────────────────────────────────────────────────────────────────
+
+ogham:hasReading a amt:Role ;
+    rdfs:label "has reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way by an editor. Each statement carries the weight of that reading among the readings of the stone." ;
+    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional." .
+
+# ── Method ──────────────────────────────────────────────────────────────────
+# The weight rule as a method individual of the FW ontology (fw:hasMethod). The
+# FW ontology has fw:EqualShareRule for the AND / OR / '?' strings of the Samian
+# data; this rule is a different one, so it has an individual of its own here.
+# Proposal: to be taken over into the FW ontology (PRIMER, S6).
+
+ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
+    rdfs:label "confidence times agreement rule"@en ;
+    rdfs:comment "Weight of a reading among the readings of one stone: the reading confidence c(r) (from the doubt markup of the reading) times the tradition agreement a(r) (the share of readings that cluster with it), divided by the sum of these products over all readings of the stone. Four decimals."@en ;
+    fw:formula "c(r) * a(r) / sum(c * a)" ;
+    fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> .
