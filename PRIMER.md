@@ -2,7 +2,7 @@
 
 Arbeitsplan für das Repository `LinkedOpenOgham/tei--epidoc-amt`. Wird zu Beginn jedes Chats hochgeladen und am Ende zurückgeschrieben. Alles Nach-außen-Sichtbare (Code, README, Ontologie, Docs) ist britisches Englisch, dieses Dokument ist deutsch.
 
-Stand: 2026-10-30, Release 0.2.0.
+Stand: 2026-10-30, Release 0.2.1.
 
 ---
 
@@ -27,7 +27,7 @@ Nicht neu bauen: die Gewichtungsregel v1 (Gewichte sind identisch zu 0.1.0, gepr
 - Die Aussagen waren in 0.1.0 Blank Nodes. Das Turtle war deshalb nicht byte-stabil. Seit 0.2.0 sind es IRIs (`data:stmt_<CIIC>_<Quelle>`).
 - Engine 0.6.0 kennt das Hextupel: `fw:hasType` (Vagueness, Uncertainty, FuzzinessWobbliness, Default Vagueness), `fw:hasMethod`, `fw:derivedFrom` (`fw:TextEvidence` mit `fw:sourceString`). `fw:hasDegreeOfConnection` entspricht `amt:weight`. 0.1.0 trug nichts davon.
 - Die Gewichtsformel `c·a / Σ(c·a)` war nirgends als Methode benannt. Die FW-Ontologie hat `fw:EqualShareRule` (für die Samian-Daten), aber keine passende Regel. Daher `ogham:ConfidenceAgreementRule` im Repo.
-- **Normalisierung versteckt c.** Garranes hat eine einzige Lesung mit c = 0,92, ihr Gewicht ist trotzdem 1,0000. Der Typ (fw:Vagueness) zeigt das jetzt an, das Gewicht allein nicht. Siehe D1.
+- **Normalisierung versteckt c.** Garranes hat eine einzige Lesung mit c = 0,92, ihr Gewicht ist trotzdem 1,0000. Der Typ (fw:Vagueness) zeigt das jetzt an, das Gewicht allein nicht. Beschlossen 2026-10-30: bleibt so (A4), die Docs erklären es auf der Seite Weights.
 - Gigha 1: sechs historische Lesungen, zwei (Diack 1926, Jackson 1971) sind in der EpiDoc-Datei auskommentiert. Der Konverter verarbeitet vier. Das ist in der README vermerkt.
 - **Nicht geprüft:** ob die Engine/der Runner die Graphen akzeptiert. Der Lauf `--check-only` wurde im Entstehungs-Chat nicht ausgeführt (Ausführung von geklontem Code wurde von der Sandbox verweigert). Stattdessen wurden die SHACL-Shapes der Engine mit pyshacl gegen die Graphen geprüft: konform. Das ersetzt S2 nicht.
 
@@ -72,6 +72,7 @@ Eigenschaften, die das Ergebnis haben muss:
 | Aussagen-IRIs | `http://data.ogham.link/amt/stmt_<CIIC>_<Quelle>`, Konflikte mit Suffix `_2` | Vorschlag 2026-10-30 |
 | Namensräume | Domäne `http://ontology.ogham.link/`, Individuen `http://data.ogham.link/amt/` | übernommen aus 0.1.0 |
 | Gewichtsregel | v1 unverändert (c·a, Schwelle 0,60, vier Dezimalen) | 2026-10-30 |
+| Gewichte als Anteile oder als unabhängige Grade? | Anteile (Summe 1) bleiben. Eine Einzel-Lesung trägt immer Gewicht 1, die Beschädigung steht im Typ. Keine Regel v2. Als bewusste Eigenschaft und Grenze in Docs und Papern benennen. Neu aufmachen nur, wenn ein Review es verlangt. | 2026-10-30 |
 | Standard-Typ ohne Faktor | kein Typ schreiben, die Engine liest Vagueness | Vorschlag 2026-10-30 |
 | Docs | Jekyll in `docs/`, Farben #004c55 / #0090a2 und Logo aus `LinkedOpenOgham/logo` | 2026-10-30 |
 | Release-Nummer | 0.2.0 (0.1.0 für den Stand vor dieser Arbeit rückwirkend benannt) | Vorschlag 2026-10-30 |
@@ -97,7 +98,7 @@ Nicht hochladen: `.venv/`, `.git/`, `build/`, die Abbildungen in `docs/diagrams/
 | S1 | Skelett, Hextupel, Diagramme, Docs, Tests | tei--epidoc-amt | S0 | erledigt 2026-10-30 |
 | S2 | Engine-/Runner-Check durch Florian | tei--epidoc-amt | S1 | offen |
 | S3 | Axiome: ist Reasoning gewollt? | tei--epidoc-amt | S2 | offen |
-| S4 | Einzel-Lesungen: Gewicht und c | tei--epidoc-amt | S1 | offen |
+| S4 | Einzel-Lesungen: Gewicht und c | tei--epidoc-amt | S1 | erledigt 2026-10-30 (Beschluss: v1 bleibt) |
 | S5 | c(r) historischer Lesungen pro Zeichen | tei--epidoc-amt | S1 | offen |
 | S6 | Methode in die FW-Ontologie | FW_Ontology | S1 | offen |
 | S7 | Release, Zenodo, Pages | tei--epidoc-amt | S2 | offen |
@@ -150,9 +151,13 @@ Vorschläge, noch nicht beschlossen:
 
 ## S4 — Einzel-Lesungen
 
-**Ziel:** Entscheidung über Garranes-artige Fälle (D1).
+**Ziel:** Entscheidung über Garranes-artige Fälle.
 
-**Abnahme:** Beschluss in A4. Falls das Gewicht c abbilden soll: neue Regel v2 mit eigenem Methoden-Individuum, v1 bleibt reproduzierbar.
+**Abnahme:** Beschluss in A4; Docs und README erklären die Eigenschaft.
+
+### Erledigt 2026-10-30
+
+Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt „What the weight does not say" auf der Seite Weights, Review-Frage 4 umformuliert, Hinweis in der README, Eintrag im CHANGELOG. Kein Code der Gewichte angefasst, alle Graphen byte-identisch zu 0.2.0. Falls ein Review unabhängige Grade verlangt: neue Regel v2 mit eigenem Methoden-Individuum, v1 bleibt reproduzierbar.
 
 ## S5 — c(r) pro Zeichen
 
@@ -176,9 +181,9 @@ Vorschläge, noch nicht beschlossen:
 
 # Teil D: Offene Punkte
 
-- **D1 Normalisierung versteckt c.** Bei einer einzigen Lesung ist das Gewicht immer 1, auch wenn c = 0,92. Soll ein Stein mit unsicherer Einzel-Lesung weniger als 1 tragen? Das wäre ein anderes Modell (Gewichte als unabhängige Grade statt Anteile). Für die Paper wichtig, weil es die Aussage "Unsicherheit wird nicht versteckt" betrifft. Als Formular fragen.
+- **D1 erledigt** (2026-10-30, siehe A4 und S4). Für die Paper: die Grenze des Anteil-Modells offen ansprechen.
 - **D2 Zuordnung der Faktoren zu den Typen.** Ist "markierte Zeichen" wirklich Vagueness und "Dissens der Editoren" wirklich Uncertainty? Das ist eine inhaltliche Entscheidung, die gegengeprüft werden sollte (FW-Ontologie, Samian-Beispiel).
 - **D3 Datenlizenz** der EpiDoc-Eingaben (OG(H)AM-Projekt) und Lizenz des Logos fehlen. Die Docs binden das Logo ein.
 - **D4 ORCID/Affiliation** in `CITATION.cff` fehlen.
-- **D5 Papiere.** ArcheoFOSS (Jahr bitte bestätigen, im Chat stand 2025) und UK CAA: Welche Abbildungen kommen hinein (Vorschlag: `02_hextuple`, `04_gigha`, `05_spectrum`), und wird die Frage aus D1 dort diskutiert?
+- **D5 Papiere.** ArcheoFOSS (Jahr bitte bestätigen, im Chat stand 2025) und UK CAA: Welche Abbildungen kommen hinein (Vorschlag: `02_hextuple`, `04_gigha`, `05_spectrum`), und wird die Grenze des Anteil-Modells (D1) dort diskutiert? Vorschlag: ja, in einem Satz.
 - **D6 Rückwirkende Release-Nummer.** Gab es für den Stand vor dieser Arbeit einen Tag 0.1.0? Falls nein, CHANGELOG-Eintrag anpassen.

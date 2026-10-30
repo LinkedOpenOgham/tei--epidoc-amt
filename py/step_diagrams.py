@@ -25,7 +25,7 @@ from diagram_kit import BRIGHT, DARK, MID, MUTED, TINT, WHITE, arrow, legend, ne
 from ogham_amt_utils import DATA, STONES, TYPE_CURIE, TYPE_TAG, slug  # noqa: E402
 from step_convert import analyse, local_names, reading_type  # noqa: E402
 
-W = 15.5                      # figure width in inches
+W = 12.5                      # figure width in inches; narrower than the page, so the type reads larger
 XLIM = (-0.4, 22.6)
 
 
@@ -53,8 +53,8 @@ def figure_model():
     arrow(ax, (xa, y0), (xb, y0), "hasReading", label_dy=0.42, boxed=False, size=11)
     ax.text((xa + xb) / 2, y0 - 0.55, "amt:weight\nfw:hasType, fw:hasMethod", ha="center", va="center",
             fontsize=8.5, color=MUTED)
-    arrow(ax, (reading["right"][0] + 0.1, y0), (agent["left"][0] - 0.1, y0), "prov:wasAttributedTo",
-          color=BRIGHT, dashed=True, label_dy=0.42, boxed=False, size=11)
+    arrow(ax, (reading["right"][0] + 0.1, y0), (agent["left"][0] - 0.1, y0), "prov:\nwasAttributedTo",
+          color=BRIGHT, dashed=True, label_dy=0.62, boxed=False, size=10)
     ax.text(11.3, 1.35, "One statement per reading. The weights of the readings of one stone add up to 1.",
             ha="center", fontsize=9, color=MUTED)
     legend(ax, 0.0, 0.5, [("class", "class (amt:Concept)"), ("solid", "weighted statement (hextuple)"),
@@ -187,7 +187,7 @@ def figure_spectrum(results):
                        Patch(fc=DARK, ec=DARK, label="fw:FuzzinessWobbliness (both)")],
               loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=4, frameon=False, fontsize=9,
               labelcolor=DARK)
-    fig.subplots_adjust(left=0.01, right=0.99, top=0.9, bottom=0.2)
+    fig.subplots_adjust(left=0.015, right=0.975, top=0.9, bottom=0.2)
     save(fig, "05_spectrum")
 
 

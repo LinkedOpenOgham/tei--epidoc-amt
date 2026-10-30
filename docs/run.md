@@ -49,4 +49,6 @@ proposals are in the PRIMER, steps S3 to S5.
 2. Is string similarity of 0.60 a sensible threshold for "the same reading"? Two editors who differ in one
    letter of eight read alike; two who differ in three do not.
 3. Should a stone with a single, unmarked reading carry a type at all? Currently it carries none.
-4. Should the weights of a stone be a share among alternatives (sum 1, as now), or independent degrees?
+4. The weights are shares among alternatives (sum 1). Is that the right reading of "weight" for a single,
+   damaged reading, given that the damage then shows in the type and not in the number? (See
+   [Weights](weights.html).)

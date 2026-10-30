@@ -65,6 +65,20 @@ RUN_REASONING = """The graphs contain **no axioms** (no role chains, inverses or
 therefore validates and exports, but infers nothing. Axioms are a modelling decision, not a technicality. The
 proposals are in the PRIMER, steps S3 to S5."""
 
+SHARE_NOTE = """## What the weight does not say
+
+The weights of a stone are **shares among the readings of that stone**, not independent degrees of belief.
+They add up to 1 by construction. Two consequences follow, and both are intended:
+
+- A stone with one reading always carries weight 1, even when that reading is damaged. Garranes
+  (c = 0.92) and Ballinrannig 6 (c = 1.00) both have weight 1.0000. The weight of a single reading says
+  "this is the only reading on record", not "this reading is certain".
+- The damage is not lost: it is in the type. Garranes carries `fw:Vagueness`, Ballinrannig 6 carries none.
+  The factors c(r) and a(r) are shown on the page [Stones](stones.html) and in `out/README.md`.
+
+An independent degree for a single reading would need a different rule. That is not part of this release;
+the decision and its reason are recorded in the PRIMER (A4, 2026-10-30)."""
+
 REVIEW_QUESTIONS = """## Questions for review
 
 1. Is the confidence of a historical reading read from editor-marked characters (`[ ] ( ) ? / \\ - . :`) a fair
@@ -72,7 +86,9 @@ REVIEW_QUESTIONS = """## Questions for review
 2. Is string similarity of 0.60 a sensible threshold for "the same reading"? Two editors who differ in one
    letter of eight read alike; two who differ in three do not.
 3. Should a stone with a single, unmarked reading carry a type at all? Currently it carries none.
-4. Should the weights of a stone be a share among alternatives (sum 1, as now), or independent degrees?"""
+4. The weights are shares among alternatives (sum 1). Is that the right reading of "weight" for a single,
+   damaged reading, given that the damage then shows in the type and not in the number? (See
+   [Weights](weights.html).)"""
 
 FOOTER_LINKS = {
     "repo": GITHUB,

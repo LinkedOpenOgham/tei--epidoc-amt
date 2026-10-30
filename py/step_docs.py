@@ -163,6 +163,8 @@ def weights_page(res) -> str:
 
 {figure("03_weighting", "From the markup to weight and type")}
 {T.TYPE_NOTE}
+
+{T.SHARE_NOTE}
 """
 
 

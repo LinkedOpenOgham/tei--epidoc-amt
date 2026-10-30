@@ -3,6 +3,19 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.1] - 2026-10-30
+
+### Changed
+- Diagrams: larger type relative to the page (the figures are drawn narrower, so the same point size reads
+  larger when the page scales them).
+- Docs, page "Weights": new section "What the weight does not say". The weights are shares among the
+  readings of a stone; a single damaged reading carries weight 1, and the damage shows in the type. Review
+  question 4 reworded accordingly.
+- Decision recorded: weight rule v1 stays; no independent-degree rule (PRIMER, A4 and S4).
+
+### Unchanged
+- Every weight, every type, every graph. `out/` is byte-identical to 0.2.0; the build rewrites only `docs/`.
+
 ## [0.2.0] - 2026-10-30
 
 Prepares the repository for AMT.engine 0.6.0 and adds documentation. The weights are unchanged.

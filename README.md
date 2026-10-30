@@ -177,6 +177,11 @@ Example — Gigha 1 (edition + four historical readings):
 | MAQICAGILEB | Rhys 1899 | 1.00 | 0.40 | 0.1818 |
 | OGMA MAQI TIGERNI | Rhys 1901 | 1.00 | 0.20 | 0.0909 |
 
+**Reading the weights.** The weights of a stone are shares among its readings
+and add up to 1. A stone with a single reading therefore always has weight 1,
+even if that reading is damaged (Garranes, c = 0.92); the damage shows in the
+type (`fw:Vagueness`), not in the number.
+
 ## Note on the data
 
 Gigha 1 records six historical readings, but two of them (Diack 1926, Jackson
