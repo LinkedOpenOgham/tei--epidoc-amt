@@ -3,6 +3,38 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-11-01
+
+Takes in the three stones of the CAA UK 2026 poster ("Purported, Alleged, Undetermined: Four Degrees of Doubt
+in the Ogham Corpus"), with the same base names as `tei--epidoc-crosswalk`.
+
+### Added
+- Three stones in `data/` and `STONES`: Dyke (`S-MOR-001`), Blackwaterfoot 1 (`S-BUT-001`) and Bishop Loch
+  (`S-LKS-X01`), with `out/dyke.amt.ttl`, `out/blackwaterfoot-1.amt.ttl` and `out/bishop-loch.amt.ttl`.
+- Records with several inscriptions are read per inscription. New concept `ogham:Inscription` and plain link
+  `ogham:hasInscription`; the weights of each inscription add up to 1 on their own. Only Blackwaterfoot 1 is
+  affected (inscriptions 1 and 2; the third is commented out and the fourth has no text).
+- Stone notes on the page "Stones" (Dyke, Blackwaterfoot 1, Bishop Loch), and two more limits of the weight on
+  the page "Weights": the status of the object is not read (Bishop Loch), and `@cert` on the edition is not read
+  (Dyke, Gigha 1).
+- Tests: weights per inscription, inscriptions do not compete, no editor for a reading without source, IRIs of
+  records without a CIIC number.
+
+### Changed
+- A record without a CIIC number is named by its file name (`data:stone_S_MOR_001`); `<idno type="CIIC"/>` with no
+  text is no longer read as a number.
+- A `<rdg>` without `@source` has no `prov:wasAttributedTo` (no shared agent for "unknown"). Its editor is shown as
+  "no editor named". Four readings of Blackwaterfoot 1 are affected; the notes name the editor in prose only.
+- `ogham:hasReading` has no formal domain any more: the subject is a stone, or an inscription in a record with
+  several. Definition and scope note say so.
+- The spectrum figure has one bar per stone, or per inscription. Prose counts follow `STONES`.
+- `CITATION.cff`: ORCID and affiliation of the author.
+
+### Unchanged
+- Weighting rule v1 and every weight and type of the four earlier stones. Their graphs differ only in the
+  ontology triples copied into every file (the new concept, the link, the reworded definitions). Figures 01 to 04
+  have the same content.
+
 ## [0.2.1] - 2026-10-30
 
 ### Changed

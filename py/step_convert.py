@@ -78,9 +78,11 @@ EDITOR_PREFIXES = {"RHY": "Rhys", "MAC": "Macalister", "DIA": "Diack",
 
 def editor_label(source_id: str) -> str:
     """Expand a resp/source id like 'MAC1945' to 'Macalister 1945'."""
-    m = re.match(r"([A-Za-z]+)(\d{4})", source_id or "")
+    if not source_id:
+        return "no editor named"
+    m = re.match(r"([A-Za-z]+)(\d{4})", source_id)
     if not m:
-        return source_id or "unknown"
+        return source_id
     name = EDITOR_PREFIXES.get(m.group(1).upper(), m.group(1).title())
     return f"{name} {m.group(2)}"
 
@@ -91,6 +93,7 @@ class Reading:
     editor: str
     text: str
     is_edition: bool = False
+    inscription: int | None = None   # n of the inscription in a file that holds several; None otherwise
     confidence: float = 1.0
     agreement: float = 0.0
     weight: float = 0.0
@@ -104,7 +107,9 @@ def _text(el) -> str:
 def parse_stone(tree) -> dict:
     ids = {}
     for idno in tree.findall(f".//{{{TEI}}}idno[@type]"):
-        ids[idno.get("type")] = (idno.text or "").strip()
+        value = (idno.text or "").strip()
+        if value:                                   # <idno type="CIIC"/> is empty for stones without a number
+            ids[idno.get("type")] = value
     title_el = tree.find(f".//{{{TEI}}}title")
     ids["title"] = _text(title_el) if title_el is not None else ""
     return ids
@@ -128,26 +133,82 @@ def _proxy_confidence(text):
     return round(max(0.0, 1.0 - unclean / len(stripped)), 4), unclean, len(stripped)
 
 
+ORDINALS = {"first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6}
+
+
+def stone_id(stone: dict) -> str:
+    """The identifier that names the stone's IRIs: its CIIC number, else its file name (S-MOR-001)."""
+    return stone.get("CIIC") or stone.get("filename") or "stone"
+
+
+def stone_ref(stone: dict) -> str:
+    """How a person cites the stone: ``CIIC 506``, or the file name where there is no CIIC number."""
+    return f"CIIC {stone['CIIC']}" if stone.get("CIIC") else stone_id(stone)
+
+
+def inscription_label(stone: dict, n) -> str:
+    """Heading of one reading unit: the stone, plus the inscription where the file holds several."""
+    base = f"{stone.get('title', '')} ({stone_ref(stone)})"
+    return base if n is None else f"{stone.get('title', '')}, inscription {n} ({stone_ref(stone)})"
+
+
+def _edition_divs(tree) -> list[tuple[int | None, object]]:
+    """The non-empty transliteration editions of the file with their inscription number.
+
+    The number is the ``n`` of the ``textpart`` of the ogham-script edition that precedes the
+    transliteration (a commented-out third inscription therefore leaves a gap, as in the file).
+    """
+    divs = tree.findall(f".//{{{TEI}}}div[@type='edition']")
+    pairs, last_n = [], None
+    for d in divs:
+        if d.get("subtype") == "ogham":
+            part = d.find(f".//{{{TEI}}}div[@type='textpart']")
+            last_n = part.get("n") if part is not None else None
+        elif d.get("subtype") == "transliteration":
+            ab = d.findall(f".//{{{TEI}}}ab")
+            if _text(ab[-1] if ab else d):
+                pairs.append((last_n, d))
+    if not pairs and divs:                          # no subtype: first edition div, as before
+        pairs = [(None, divs[0])]
+    return pairs
+
+
+def _rdg_inscription(rdg) -> int:
+    """The inscription an apparatus reading belongs to, from the ordinal in the note of its ``<app>``."""
+    app = next((a for a in rdg.iterancestors() if etree.QName(a).localname == "app"), None)
+    note = app.find(f"{{{TEI}}}note") if app is not None else None
+    m = re.search(r"\b(%s)\s+inscription" % "|".join(ORDINALS), _text(note).lower() if note is not None else "")
+    if not m:
+        raise SystemExit("A file with several inscriptions has a <rdg> whose <app> note does not say which "
+                         f"inscription it belongs to: {_text(rdg)!r}")
+    return ORDINALS[m.group(1)]
+
+
 def parse_readings(tree) -> list[Reading]:
-    """Collect the current edition reading plus every active historical <rdg>."""
+    """Collect the current edition reading(s) plus every active historical <rdg>.
+
+    A file with one inscription (the usual case) yields readings that compete with one another. A
+    file with several (Blackwaterfoot 1) yields them per inscription: the readings of the first and
+    of the second inscription are not alternatives of each other, so ``Reading.inscription`` keeps
+    them apart and the weights are computed within each.
+    """
     readings: list[Reading] = []
 
-    div = tree.find(f".//{{{TEI}}}div[@type='edition'][@subtype='transliteration']")
-    if div is None:
-        div = tree.find(f".//{{{TEI}}}div[@type='edition']")
-    if div is not None:
+    editions = _edition_divs(tree)
+    several = len(editions) > 1
+    for n, div in editions:
         ab = div.findall(f".//{{{TEI}}}ab")
         txt = _text(ab[-1]) if ab else _text(div)   # reader-facing transliteration
-        if txt:
-            resp = (div.get("resp") or "").lstrip("#") or "OGHAM"
-            U = len(div.findall(f".//{{{TEI}}}unclear"))
-            S = len(div.findall(f".//{{{TEI}}}supplied"))
-            G = len(div.findall(f".//{{{TEI}}}gap"))
-            c, L = _edition_confidence(U, S, G, txt)
-            readings.append(Reading(
-                source_id=f"OGHAM_{resp}", editor=f"OG(H)AM edition ({resp})",
-                text=txt, is_edition=True, confidence=c,
-                signals={"kind": "edition", "unclear": U, "supplied": S, "gap": G, "length": L}))
+        resp = (div.get("resp") or "").lstrip("#") or "OGHAM"
+        U = len(div.findall(f".//{{{TEI}}}unclear"))
+        S = len(div.findall(f".//{{{TEI}}}supplied"))
+        G = len(div.findall(f".//{{{TEI}}}gap"))
+        c, L = _edition_confidence(U, S, G, txt)
+        readings.append(Reading(
+            source_id=f"OGHAM_{resp}", editor=f"OG(H)AM edition ({resp})",
+            text=txt, is_edition=True, confidence=c,
+            inscription=int(n) if several and n else None,
+            signals={"kind": "edition", "unclear": U, "supplied": S, "gap": G, "length": L}))
 
     for rdg in tree.findall(f".//{{{TEI}}}rdg"):
         src = (rdg.get("source") or rdg.get("resp") or "").lstrip("#")
@@ -157,8 +218,18 @@ def parse_readings(tree) -> list[Reading]:
         c, unclean, L = _proxy_confidence(txt)
         readings.append(Reading(
             source_id=src, editor=editor_label(src), text=txt, confidence=c,
+            inscription=_rdg_inscription(rdg) if several else None,
             signals={"kind": "proxy", "unclean": unclean, "length": L}))
     return readings
+
+
+def units(readings: list[Reading]) -> list[tuple[int | None, list[Reading]]]:
+    """The readings grouped by inscription, in order of first appearance (one group for most stones)."""
+    order: list[int | None] = []
+    for r in readings:
+        if r.inscription not in order:
+            order.append(r.inscription)
+    return [(n, [r for r in readings if r.inscription == n]) for n in sorted(order, key=lambda k: (k is None, k))]
 
 
 def _normalise_reading(text: str) -> str:
@@ -166,16 +237,18 @@ def _normalise_reading(text: str) -> str:
 
 
 def compute_weights(readings: list[Reading]) -> None:
-    norm = [_normalise_reading(r.text) for r in readings]
-    n = len(readings)
-    for i, r in enumerate(readings):
-        cluster = sum(1 for j in range(n)
-                      if i == j or SequenceMatcher(None, norm[i], norm[j]).ratio() >= AGREEMENT_THRESHOLD)
-        r.agreement = round(cluster / n, 4)
-    raw = [r.confidence * r.agreement for r in readings]
-    total = sum(raw) or 1.0
-    for r, s in zip(readings, raw):
-        r.weight = round(s / total, 4)
+    """Weights within each inscription: readings of different inscriptions are not alternatives."""
+    for _, group in units(readings):
+        norm = [_normalise_reading(r.text) for r in group]
+        n = len(group)
+        for i, r in enumerate(group):
+            cluster = sum(1 for j in range(n)
+                          if i == j or SequenceMatcher(None, norm[i], norm[j]).ratio() >= AGREEMENT_THRESHOLD)
+            r.agreement = round(cluster / n, 4)
+        raw = [r.confidence * r.agreement for r in group]
+        total = sum(raw) or 1.0
+        for r, share in zip(group, raw):
+            r.weight = round(share / total, 4)
 
 
 def reading_type(r: Reading):
@@ -212,26 +285,36 @@ def local_names(stone: dict, readings: list[Reading]) -> list[dict]:
 
     Used by ``build_graph`` and by the documentation, so that both name the same
     IRIs. Two readings with the same source id get ``_2``, ``_3`` ... rather than
-    silently merging into one node.
+    silently merging into one node. In a file with several inscriptions the names
+    carry the inscription (``..._i2_FOR1996``).
     """
-    ciic = slug(stone.get("CIIC", stone.get("filename", "stone")))
+    ident = slug(stone_id(stone))
     seen: dict[str, int] = {}
     names = []
     for r in readings:
         key = slug(r.source_id or r.text)
+        if r.inscription is not None:
+            key = f"i{r.inscription}_{key}"
         seen[key] = seen.get(key, 0) + 1
         suffix = "" if seen[key] == 1 else f"_{seen[key]}"
         names.append({
-            "reading": f"reading_{ciic}_{key}{suffix}",
-            "statement": f"stmt_{ciic}_{key}{suffix}",
-            "evidence": f"evidence_{ciic}_{key}{suffix}",
-            "agent": f"agent_{slug(r.source_id)}",
+            "reading": f"reading_{ident}_{key}{suffix}",
+            "statement": f"stmt_{ident}_{key}{suffix}",
+            "evidence": f"evidence_{ident}_{key}{suffix}",
+            "agent": f"agent_{slug(r.source_id)}" if r.source_id else None,
         })
     return names
 
 
 def stone_iri(stone: dict):
-    return DATA_NS[f"stone_{slug(stone.get('CIIC', stone.get('filename', 'stone')))}"]
+    return DATA_NS[f"stone_{slug(stone_id(stone))}"]
+
+
+def subject_iri(stone: dict, inscription):
+    """The subject of ``hasReading``: the stone, or its inscription where the file holds several."""
+    if inscription is None:
+        return stone_iri(stone)
+    return DATA_NS[f"inscription_{slug(stone_id(stone))}_{inscription}"]
 
 
 def build_graph(stone: dict, readings: list[Reading]) -> Graph:
@@ -241,23 +324,28 @@ def build_graph(stone: dict, readings: list[Reading]) -> Graph:
                     ("prov", PROV), ("rdfs", RDFS), ("skos", SKOS), ("xsd", XSD)):
         g.bind(pfx, ns)
 
-    ciic = stone.get("CIIC", stone.get("filename", "stone"))
     s_uri = stone_iri(stone)
-    label = stone.get("title") or f"CIIC {ciic}"
     g.add((s_uri, AMT.instanceOf, OGHAM.OghamStone))
-    g.add((s_uri, RDFS.label, Literal(f"{label} (CIIC {ciic})")))
+    g.add((s_uri, RDFS.label, Literal(inscription_label(stone, None))))
+    for n, _ in units(readings):
+        if n is not None:                            # a file with several inscriptions
+            i_uri = subject_iri(stone, n)
+            g.add((i_uri, AMT.instanceOf, OGHAM.Inscription))
+            g.add((i_uri, RDFS.label, Literal(inscription_label(stone, n))))
+            g.add((s_uri, OGHAM.hasInscription, i_uri))
 
     for r, n in zip(readings, local_names(stone, readings)):
         r_uri = DATA_NS[n["reading"]]
         g.add((r_uri, AMT.instanceOf, OGHAM.Reading))
         g.add((r_uri, RDFS.label, Literal(r.text)))
-        agent = DATA_NS[n["agent"]]
-        g.add((agent, RDF.type, PROV.Agent))
-        g.add((agent, RDFS.label, Literal(r.editor)))
-        g.add((r_uri, PROV.wasAttributedTo, agent))
+        if n["agent"]:                               # a <rdg> without @source has no attributable editor
+            agent = DATA_NS[n["agent"]]
+            g.add((agent, RDF.type, PROV.Agent))
+            g.add((agent, RDFS.label, Literal(r.editor)))
+            g.add((r_uri, PROV.wasAttributedTo, agent))
 
         st, ev = DATA_NS[n["statement"]], DATA_NS[n["evidence"]]
-        g.add((st, RDF.subject, s_uri))
+        g.add((st, RDF.subject, subject_iri(stone, r.inscription)))
         g.add((st, RDF.predicate, OGHAM.hasReading))
         g.add((st, RDF.object, r_uri))
         g.add((st, AMT.weight, Literal(f"{r.weight:.4f}", datatype=XSD.decimal)))
@@ -295,7 +383,7 @@ def hextuple_example(results) -> str:
             i = max(range(len(readings)), key=lambda k: readings[k].weight)
             r, n = readings[i], names[i]
             lines = [f"data:{n['statement']}",
-                     f"    rdf:subject    data:stone_{slug(stone.get('CIIC', 'stone'))} ;",
+                     f"    rdf:subject    data:{str(subject_iri(stone, r.inscription)).rsplit('/', 1)[-1]} ;",
                      "    rdf:predicate  ogham:hasReading ;",
                      f"    rdf:object     data:{n['reading']} ;",
                      f"    amt:weight     {r.weight:.4f} ;"]
@@ -323,6 +411,14 @@ def write_out_readme(results: list[tuple[dict, list[Reading], str]]) -> None:
     add("- the **current edition** — the `<div type=\"edition\">` transliteration; and")
     add("- every active **historical reading** in the apparatus — `<rdg>` "
         "(readings commented out in the XML are ignored).\n")
+    add("A file that holds **several inscriptions** (Blackwaterfoot 1) is read per inscription: the "
+        "readings of the first and of the second inscription are not alternatives of each other, so each "
+        "inscription is its own subject (`ogham:Inscription`, linked from the stone by `ogham:hasInscription`) "
+        "and its weights add up to 1 on their own. An apparatus reading is assigned to an inscription by the "
+        "ordinal in the note of its `<app>` (\"For the second inscription, …\"). An inscription with no "
+        "transliteration and no reading (the fourth one, in Blackwaterfoot 1) has no statement.\n")
+    add("A `<rdg>` without `@source` has **no editor** in the file (the name stands in the note, not in an "
+        "attribute). It is not attributed to anyone: the graph has no `prov:wasAttributedTo` for it.\n")
     add("The editorial doubt markup is mapped to per-character base certainties:\n")
     add("| EpiDoc signal | meaning | base certainty | penalty (1 − certainty) |")
     add("|---|---|---|---|")
@@ -354,7 +450,8 @@ def write_out_readme(results: list[tuple[dict, list[Reading], str]]) -> None:
     add("Every reading is an `amt:Concept` individual (`amt:instanceOf ogham:Reading`); the stone "
         "`hasReading` each of them as a **hextuple**: a reified statement (`rdf:subject`, `rdf:predicate`, "
         "`rdf:object`) carrying `amt:weight`, `fw:hasType` and `fw:hasMethod`, with the reading string "
-        "as `fw:TextEvidence` (`fw:derivedFrom`). Each reading is `prov:wasAttributedTo` its editor. "
+        "as `fw:TextEvidence` (`fw:derivedFrom`). Each reading whose source the file names is "
+        "`prov:wasAttributedTo` its editor. "
         "The normalised weights are a belief distribution, bridged to CIDOC CRM's argumentation model "
         "**CRMinf (I2 Belief)**. Literal shape, taken from the data:\n")
     add("```turtle\n" + hextuple_example(results) + "\n```\n")
@@ -365,24 +462,27 @@ def write_out_readme(results: list[tuple[dict, list[Reading], str]]) -> None:
 
     add("## 5. Per stone\n")
     for stone, readings, out in results:
-        ciic = stone.get("CIIC", "?")
-        title = stone.get("title", "?")
+        ident = stone_id(stone)
         n_ed = sum(1 for r in readings if r.is_edition)
-        add(f"### {title} (CIIC {ciic})\n")
+        add(f"### {stone.get('title', '?')} ({stone_ref(stone)})\n")
         add(f"`{out}` — {len(readings)} reading(s): {n_ed} edition + {len(readings) - n_ed} historical.\n")
-        add("| reading | editor | extracted doubt | c | a | amt:weight | type |")
-        add("|---|---|---|---|---|---|---|")
-        for r in sorted(readings, key=lambda x: (-x.weight, x.source_id)):
-            txt = r.text if len(r.text) <= 34 else r.text[:31] + "…"
-            add(f"| {txt} | {r.editor} | {_signals_str(r)} | {r.confidence:.2f} | "
-                f"{r.agreement:.2f} | **{r.weight:.4f}** | {TYPE_TAG[reading_type(r)] or '-'} |")
-        add("\n*c per reading:*\n")
-        for r in sorted(readings, key=lambda x: (-x.weight, x.source_id)):
-            add(f"- {r.editor}: c = {_c_formula(r)}")
-        add("\n*AMT statements (stone → reading @ weight):*\n")
-        for r in sorted(readings, key=lambda x: (-x.weight, x.source_id)):
-            add(f"- `stone_{slug(ciic)}` —`hasReading`→ *{r.editor}* · **weight {r.weight:.4f}**")
-        add("")
+        for n, group in units(readings):
+            if n is not None:
+                add(f"#### Inscription {n}\n")
+            add("| reading | editor | extracted doubt | c | a | amt:weight | type |")
+            add("|---|---|---|---|---|---|---|")
+            for r in sorted(group, key=lambda x: (-x.weight, x.source_id)):
+                txt = r.text if len(r.text) <= 34 else r.text[:31] + "…"
+                add(f"| {txt} | {r.editor} | {_signals_str(r)} | {r.confidence:.2f} | "
+                    f"{r.agreement:.2f} | **{r.weight:.4f}** | {TYPE_TAG[reading_type(r)] or '-'} |")
+            add("\n*c per reading:*\n")
+            for r in sorted(group, key=lambda x: (-x.weight, x.source_id)):
+                add(f"- {r.editor}: c = {_c_formula(r)}")
+            subject = str(subject_iri(stone, n)).rsplit("/", 1)[-1]
+            add(f"\n*AMT statements ({'inscription' if n is not None else 'stone'} → reading @ weight):*\n")
+            for r in sorted(group, key=lambda x: (-x.weight, x.source_id)):
+                add(f"- `{subject}` —`hasReading`→ *{r.editor}* · **weight {r.weight:.4f}**")
+            add("")
     add("*Type: V = `fw:Vagueness`, U = `fw:Uncertainty`, FW = `fw:FuzzinessWobbliness`, "
         "`-` = no type written.*\n")
 
@@ -403,11 +503,12 @@ def process(input_path: Path, output_path: Path, shapes=None, ontology=None):
     stone, readings = analyse(input_path)
 
     n_ed = sum(1 for r in readings if r.is_edition)
-    print(f"\n{stone.get('title', '?')} (CIIC {stone.get('CIIC', '?')}) "
+    print(f"\n{stone.get('title', '?')} ({stone_ref(stone)}) "
           f"-- {len(readings)} reading(s): {n_ed} edition + {len(readings) - n_ed} historical")
     for r in sorted(readings, key=lambda x: (-x.weight, x.source_id)):
         tag = "EDITION" if r.is_edition else "hist.  "
-        print(f"  [{tag}] {r.editor:22} c={r.confidence:.2f} a={r.agreement:.2f} "
+        part = "" if r.inscription is None else f"i{r.inscription} "
+        print(f"  [{tag}] {part}{r.editor:22} c={r.confidence:.2f} a={r.agreement:.2f} "
               f"w={r.weight:.4f} {TYPE_TAG[reading_type(r)]:>2}  {r.text[:46]}")
 
     g = build_graph(stone, readings)

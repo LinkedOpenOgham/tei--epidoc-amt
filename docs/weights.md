@@ -13,7 +13,7 @@ visible which factor lowered a weight.
 |---|---|
 | 1. Reading confidence c(r) | For the current edition from the markup: `unclear`, `supplied` and `gap` lower it. For a historical reading, from the characters the editor marked as doubtful. A reading without any marker has c = 1. |
 | 2. Tradition agreement a(r) | The share of the readings of the stone that cluster with this one, by string similarity of at least 0.60. |
-| 3. Normalise | weight = c(r) * a(r) divided by the sum of c * a over all readings of the stone, rounded to four decimals. |
+| 3. Normalise | weight = c(r) * a(r) divided by the sum of c * a over all readings of the same stone, or of the same inscription where a file holds several, rounded to four decimals. |
 | 4. Type | c < 1 and a = 1: fw:Vagueness. a < 1 and c = 1: fw:Uncertainty. Both below 1: fw:FuzzinessWobbliness. Neither: no type is written, and AMT.engine reads the default fw:Vagueness. |
 
 ![From the markup to weight and type](diagrams/03_weighting.svg)
@@ -38,3 +38,13 @@ They add up to 1 by construction. Two consequences follow, and both are intended
 
 An independent degree for a single reading would need a different rule. That is not part of this release;
 the decision and its reason are recorded in the PRIMER (A4, 2026-10-30).
+
+Two more things the weight does not say, both visible in the stones of release 0.3.0:
+
+- **It reads the markup of the reading, not the status of the object.** Bishop Loch carries one reading
+  with two `<gap>` elements, so its weight is 1.0000 and its type `fw:Vagueness`. Whether the object is an
+  ogham inscription at all is said only in prose in the record (see [Stones](stones.html)); no element
+  carries it, so no weight can.
+- **It does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
+  on its `<div>`. Rule v1 counts `unclear`, `supplied` and `gap` and ignores the attribute, so the
+  doubt the editors put on the whole edition is not in c(r).

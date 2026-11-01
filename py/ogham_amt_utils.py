@@ -13,7 +13,7 @@ from pathlib import Path
 
 from rdflib import Namespace
 
-RELEASE = "0.2.1"
+RELEASE = "0.3.0"
 
 GITHUB = "https://github.com/LinkedOpenOgham/tei--epidoc-amt"
 BLOB = GITHUB + "/blob/main/"
@@ -32,6 +32,9 @@ STONES = [
     ("I-COR-001.xml", "coomleagh-east"),  # Coomleagh East, CIIC 55
     ("I-COR-030.xml", "garranes"),        # Garranes, CIIC 81
     ("I-KER-020.xml", "ballinrannig6"),   # Ballinrannig 6, CIIC 153 -- clean
+    ("S-MOR-001.xml", "dyke"),            # Dyke -- no CIIC number, one reading with markup
+    ("S-BUT-001.xml", "blackwaterfoot-1"),  # Blackwaterfoot 1 -- two inscriptions, readings without @source
+    ("S-LKS-X01.xml", "bishop-loch"),     # Bishop Loch -- doubtful record, almost no markup
 ]
 
 TEI = "http://www.tei-c.org/ns/1.0"
@@ -49,6 +52,15 @@ FW_FUZZINESS_WOBBLINESS = FW.FuzzinessWobbliness
 TYPE_TAG = {FW_VAGUENESS: "V", FW_UNCERTAINTY: "U", FW_FUZZINESS_WOBBLINESS: "FW", None: ""}
 TYPE_CURIE = {FW_VAGUENESS: "fw:Vagueness", FW_UNCERTAINTY: "fw:Uncertainty",
               FW_FUZZINESS_WOBBLINESS: "fw:FuzzinessWobbliness", None: "none"}
+
+
+NUMBER_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight",
+                9: "nine", 10: "ten"}
+
+
+def number_word(n: int) -> str:
+    """``7`` -> ``seven``; larger numbers stay digits. Keeps the prose in step with ``STONES``."""
+    return NUMBER_WORDS.get(n, str(n))
 
 
 def slug(text: str) -> str:

@@ -32,7 +32,7 @@ python main.py --only check
 ```
 
 It clones the [amt-runner](https://github.com/alpaca-fair-framework/amt-runner) into `build/` (ignored by git), then calls
-`run_amt.py <graph> --check-only --update` for each of the four graphs. `--check-only` validates against the
+`run_amt.py <graph> --check-only --update` for each of the seven graphs. `--check-only` validates against the
 AMT shapes, loads the graph and runs the diagnostics (`AMT-E101`, `AMT-E102`, `AMT-E103`, `AMT-N301`), and
 writes no output. The report is `build/check-report.txt`.
 

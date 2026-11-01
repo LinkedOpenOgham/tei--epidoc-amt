@@ -6,10 +6,10 @@ title: Linked Open Ogham: AMT
 
 # Linked Open Ogham: AMT
 
-> **Status: prototype, release 0.2.1.** The model is small on purpose. What is verified and what is still open is stated on the page [Run](run.html).
+> **Status: prototype, release 0.3.0.** The model is small on purpose. What is verified and what is still open is stated on the page [Run](run.html).
 
 Ogham stones are read differently by different editors. This repository turns the
-competing readings of four stones, as they stand in the OG(H)AM EpiDoc files, into **weighted statements** in
+competing readings of seven stones, as they stand in the OG(H)AM EpiDoc files, into **weighted statements** in
 the vocabulary of the [Academic Meta Tool (AMT)](https://github.com/alpaca-fair-framework/amt-engine). Doubt
 is not removed and not hidden in a footnote: every reading becomes one statement, and the weights of the
 readings of one stone add up to 1.
@@ -35,7 +35,7 @@ Source: [PNG](diagrams/01_model.png), drawn by `py/step_diagrams.py` from the da
 | [Model](model.html) | The concepts, the role, and one statement as a hextuple |
 | [Vocabulary](vocabulary.html) | Every concept, role and method: definition and scope note |
 | [Weights](weights.html) | How the weight and its type are computed |
-| [Stones](stones.html) | The four stones: every reading with its weight and type |
+| [Stones](stones.html) | The seven stones: every reading with its weight and type |
 | [Run](run.html) | What has been checked, and how to check it with the AMT runner |
 
 ## Files
@@ -44,7 +44,7 @@ Source: [PNG](diagrams/01_model.png), drawn by `py/step_diagrams.py` from the da
 |---|---|
 | [`ontology/ogham-amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/ontology/ogham-amt.ttl) | The domain model in the AMT vocabulary |
 | [`py/step_convert.py`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py) | EpiDoc to AMT Turtle: readings, weights, types |
-| [`out/*.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/out) | 4 graphs with 9 weighted statements |
+| [`out/*.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/out) | 7 graphs with 19 weighted statements |
 | [`out/README.md`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/out/README.md) | Generated breakdown of the extraction |
 
 ## Rebuild

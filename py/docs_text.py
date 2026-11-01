@@ -9,7 +9,7 @@ STATUS = ("> **Status: prototype, release {release}.** The model is small on pur
           "What is verified and what is still open is stated on the page [Run](run.html).")
 
 INDEX_INTRO = """Ogham stones are read differently by different editors. This repository turns the
-competing readings of four stones, as they stand in the OG(H)AM EpiDoc files, into **weighted statements** in
+competing readings of {stones} stones, as they stand in the OG(H)AM EpiDoc files, into **weighted statements** in
 the vocabulary of the [Academic Meta Tool (AMT)](https://github.com/alpaca-fair-framework/amt-engine). Doubt
 is not removed and not hidden in a footnote: every reading becomes one statement, and the weights of the
 readings of one stone add up to 1."""
@@ -22,7 +22,8 @@ IDEA = """1. **One statement per reading.** The stone is linked to each reading 
    by uncertainty or by both, using the three types of the
    [Fuzziness-Wobbliness ontology](https://github.com/alpaca-fair-framework/FW_Ontology)."""
 
-MODEL_NOTE = """The model has two concepts and one role. Nothing is inferred from it: the graphs hold weighted
+MODEL_NOTE = """The model has three concepts (stone, inscription, reading), one role (`hasReading`) and one
+plain link (`hasInscription`, written only for records with several inscriptions). Nothing is inferred from it: the graphs hold weighted
 statements only, no axioms. That is a deliberate choice for this release; the page [Run](run.html) says
 what it means for the engine."""
 
@@ -38,7 +39,7 @@ WEIGHT_STEPS = """| Step | What happens |
 |---|---|
 | 1. Reading confidence c(r) | For the current edition from the markup: `unclear`, `supplied` and `gap` lower it. For a historical reading, from the characters the editor marked as doubtful. A reading without any marker has c = 1. |
 | 2. Tradition agreement a(r) | The share of the readings of the stone that cluster with this one, by string similarity of at least 0.60. |
-| 3. Normalise | weight = c(r) * a(r) divided by the sum of c * a over all readings of the stone, rounded to four decimals. |
+| 3. Normalise | weight = c(r) * a(r) divided by the sum of c * a over all readings of the same stone, or of the same inscription where a file holds several, rounded to four decimals. |
 | 4. Type | c < 1 and a = 1: fw:Vagueness. a < 1 and c = 1: fw:Uncertainty. Both below 1: fw:FuzzinessWobbliness. Neither: no type is written, and AMT.engine reads the default fw:Vagueness. |"""
 
 TYPE_NOTE = """> The typing follows the Fuzziness-Wobbliness ontology: **vagueness** is a degree to which a
@@ -57,7 +58,7 @@ python main.py --only check
 ```
 
 It clones the [amt-runner]({runner}) into `build/` (ignored by git), then calls
-`run_amt.py <graph> --check-only --update` for each of the four graphs. `--check-only` validates against the
+`run_amt.py <graph> --check-only --update` for each of the {graphs} graphs. `--check-only` validates against the
 AMT shapes, loads the graph and runs the diagnostics (`AMT-E101`, `AMT-E102`, `AMT-E103`, `AMT-N301`), and
 writes no output. The report is `build/check-report.txt`."""
 
@@ -77,7 +78,17 @@ They add up to 1 by construction. Two consequences follow, and both are intended
   The factors c(r) and a(r) are shown on the page [Stones](stones.html) and in `out/README.md`.
 
 An independent degree for a single reading would need a different rule. That is not part of this release;
-the decision and its reason are recorded in the PRIMER (A4, 2026-10-30)."""
+the decision and its reason are recorded in the PRIMER (A4, 2026-10-30).
+
+Two more things the weight does not say, both visible in the stones of release 0.3.0:
+
+- **It reads the markup of the reading, not the status of the object.** Bishop Loch carries one reading
+  with two `<gap>` elements, so its weight is 1.0000 and its type `fw:Vagueness`. Whether the object is an
+  ogham inscription at all is said only in prose in the record (see [Stones](stones.html)); no element
+  carries it, so no weight can.
+- **It does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
+  on its `<div>`. Rule v1 counts `unclear`, `supplied` and `gap` and ignores the attribute, so the
+  doubt the editors put on the whole edition is not in c(r)."""
 
 REVIEW_QUESTIONS = """## Questions for review
 
@@ -89,6 +100,30 @@ REVIEW_QUESTIONS = """## Questions for review
 4. The weights are shares among alternatives (sum 1). Is that the right reading of "weight" for a single,
    damaged reading, given that the damage then shows in the type and not in the number? (See
    [Weights](weights.html).)"""
+
+# Notes per stone on the page "Stones", keyed by the output base name. Each sentence is taken from the
+# EpiDoc record or from the converter; nothing is added about the objects.
+STONE_NOTES = {
+    "dyke": """The record has no CIIC number; its file name `S-MOR-001` names it. The note in the apparatus speaks
+of three inscriptions, but the file holds one transliteration of three lines, which is one reading here.
+The edition carries `cert="low"` on its `<div>`, which the weight does not read (see [Weights](weights.html)).""",
+    "blackwaterfoot-1": """The file holds several inscriptions, and the notes of the apparatus say which reading belongs to
+which ("For the second inscription, ..."). Each inscription with a reading is its own subject
+(`ogham:Inscription`, linked by `ogham:hasInscription`), and its weights add up to 1 on their own: the
+readings of the first inscription are not alternatives of the second. The third inscription is commented
+out in the file and the fourth has no text and no reading, so neither has a statement.
+
+Four of the apparatus readings have no `@source`; the note names the editor in prose (for example Jackson
+1973), but the graph does not parse prose, so these readings have no `prov:wasAttributedTo`. The two readings
+of `FOR1996` on the second inscription are two nodes in this graph.""",
+    "bishop-loch": """The record has no CIIC number; its identifier carries the series letter X, which the sister
+repository [tei--epidoc-crosswalk](https://github.com/LinkedOpenOgham/tei--epidoc-crosswalk) exports as
+`ogham:recordStatus "doubtful"`. The record calls the markings "purported" and
+"alleged" and the object a stick "bearing ogham-like markings", in prose only. The only
+markup in the edition is two `<gap>` elements. That is the **limit of the method**: the single reading has
+weight 1.0000 and type `fw:Vagueness` (c = 0.60 from the gaps), and neither says that the object may not
+carry an ogham inscription. The doubt about the object is not in the markup, so it cannot be in the weight.""",
+}
 
 FOOTER_LINKS = {
     "repo": GITHUB,

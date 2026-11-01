@@ -6,7 +6,9 @@ title: Stones
 
 # Stones
 
-Four stones form a spectrum of doubt, from five competing readings to one unmarked reading.
+seven stones form a spectrum of doubt, from five competing readings to one unmarked reading.
+eight groups of readings are shown, because a record with several inscriptions is read per
+inscription (see Blackwaterfoot 1).
 
 ![Spectrum of doubt](diagrams/05_spectrum.svg)
 
@@ -52,3 +54,63 @@ Graph: [`out/ballinrannig6.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epi
 | Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
 |---|---|---|---|---|---|---|
 | OG(H)AM edition (NW) | `CCICAMINIvac. MAQQ[/I] C[A]TTINI` | 0× `<unclear>`, 0× `<supplied>`, 0× `<gap>` | 1 − (0.5·0 + 0.7·0 + 1.0·0) / 24 = **1.00** | 1.00 | **1.0000** | none |
+
+## Dyke (S-MOR-001)
+
+Graph: [`out/dyke.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/out/dyke.amt.ttl)
+
+The record has no CIIC number; its file name `S-MOR-001` names it. The note in the apparatus speaks
+of three inscriptions, but the file holds one transliteration of three lines, which is one reading here.
+The edition carries `cert="low"` on its `<div>`, which the weight does not read (see [Weights](weights.html)).
+
+| Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
+|---|---|---|---|---|---|---|
+| OG(H)AM edition (LH) | `[---]RRMOQQDITTOSSS[---] [---]EDDARRNON V[---]THIHAL[---]IRR[---]UIBUZ[---] SONSELCCO[---]` | 12× `<unclear>`, 0× `<supplied>`, 9× `<gap>` | 1 − (0.5·12 + 0.7·0 + 1.0·9) / 47 = **0.68** | 1.00 | **1.0000** | fw:Vagueness |
+
+## Blackwaterfoot 1 (S-BUT-001)
+
+Graph: [`out/blackwaterfoot-1.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/out/blackwaterfoot-1.amt.ttl)
+
+The file holds several inscriptions, and the notes of the apparatus say which reading belongs to
+which ("For the second inscription, ..."). Each inscription with a reading is its own subject
+(`ogham:Inscription`, linked by `ogham:hasInscription`), and its weights add up to 1 on their own: the
+readings of the first inscription are not alternatives of the second. The third inscription is commented
+out in the file and the fourth has no text and no reading, so neither has a statement.
+
+Four of the apparatus readings have no `@source`; the note names the editor in prose (for example Jackson
+1973), but the graph does not parse prose, so these readings have no `prov:wasAttributedTo`. The two readings
+of `FOR1996` on the second inscription are two nodes in this graph.
+
+### Inscription 1
+
+| Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
+|---|---|---|---|---|---|---|
+| no editor named | `H(i/e)OMEQ(i/e)[~]` | proxy: 8 editor-marked char(s) of 18 | 1 − 8 / 18 = **0.56** | 0.50 | **0.3077** | fw:FuzzinessWobbliness |
+| no editor named | `EOMEDTE or EOMEQE` | proxy: 0 editor-marked char(s) of 15 | 1 − 0 / 15 = **1.00** | 0.25 | **0.2769** | fw:Uncertainty |
+| no editor named | `EVLEMOE or ENEMOE` | proxy: 0 editor-marked char(s) of 15 | 1 − 0 / 15 = **1.00** | 0.25 | **0.2769** | fw:Uncertainty |
+| OG(H)AM edition (KF) | `[---]MEQE[---]` | 2× `<unclear>`, 0× `<supplied>`, 2× `<gap>` | 1 − (0.5·2 + 0.7·0 + 1.0·2) / 4 = **0.25** | 0.50 | **0.1385** | fw:FuzzinessWobbliness |
+
+### Inscription 2
+
+| Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
+|---|---|---|---|---|---|---|
+| Forsyth 1996 | `BLUEDLA` | proxy: 0 editor-marked char(s) of 7 | 1 − 0 / 7 = **1.00** | 0.75 | **0.3913** | fw:Uncertainty |
+| Fis 2001 | `LUEDBH` | proxy: 0 editor-marked char(s) of 6 | 1 − 0 / 6 = **1.00** | 0.50 | **0.2609** | fw:Uncertainty |
+| OG(H)AM edition (KF) | `[---]VUEDLA` | 0× `<unclear>`, 0× `<supplied>`, 1× `<gap>` | 1 − (0.5·0 + 0.7·0 + 1.0·1) / 6 = **0.83** | 0.50 | **0.2174** | fw:FuzzinessWobbliness |
+| Forsyth 1996 | `ADLEUV` | proxy: 0 editor-marked char(s) of 6 | 1 − 0 / 6 = **1.00** | 0.25 | **0.1304** | fw:Uncertainty |
+
+## Bishop Loch (S-LKS-X01)
+
+Graph: [`out/bishop-loch.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/out/bishop-loch.amt.ttl)
+
+The record has no CIIC number; its identifier carries the series letter X, which the sister
+repository [tei--epidoc-crosswalk](https://github.com/LinkedOpenOgham/tei--epidoc-crosswalk) exports as
+`ogham:recordStatus "doubtful"`. The record calls the markings "purported" and
+"alleged" and the object a stick "bearing ogham-like markings", in prose only. The only
+markup in the edition is two `<gap>` elements. That is the **limit of the method**: the single reading has
+weight 1.0000 and type `fw:Vagueness` (c = 0.60 from the gaps), and neither says that the object may not
+carry an ogham inscription. The doubt about the object is not in the markup, so it cannot be in the weight.
+
+| Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
+|---|---|---|---|---|---|---|
+| OG(H)AM edition (NW) | `AT[---]H[---] AL` | 0× `<unclear>`, 0× `<supplied>`, 2× `<gap>` | 1 − (0.5·0 + 0.7·0 + 1.0·2) / 5 = **0.60** | 1.00 | **1.0000** | fw:Vagueness |

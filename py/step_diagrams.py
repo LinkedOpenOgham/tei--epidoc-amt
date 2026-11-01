@@ -5,7 +5,8 @@
   02_hextuple    one reading as a hextuple, from the real data       (full semantics)
   03_weighting   from the EpiDoc markup to amt:weight and fw:hasType
   04_gigha       Gigha 1: one stone, five competing readings, with weights and types
-  05_spectrum    the four stones side by side, one bar per stone, one segment per reading
+  05_spectrum    the stones side by side, one bar per stone (per inscription where a file holds
+                 several), one segment per reading
 
 Everything that has a name in the ontology or a value in the data is read from
 there; only the positions are fixed here. Colours are those of the Linked Open
@@ -22,8 +23,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
 
 from diagram_kit import BRIGHT, DARK, MID, MUTED, TINT, WHITE, arrow, legend, new_canvas, node, save  # noqa: E402
-from ogham_amt_utils import DATA, STONES, TYPE_CURIE, TYPE_TAG, slug  # noqa: E402
-from step_convert import analyse, local_names, reading_type  # noqa: E402
+from ogham_amt_utils import DATA, STONES, TYPE_CURIE, TYPE_TAG, number_word, slug  # noqa: E402
+from step_convert import analyse, inscription_label, local_names, reading_type, stone_id, stone_ref, subject_iri, units  # noqa: E402
 
 W = 12.5                      # figure width in inches; narrower than the page, so the type reads larger
 XLIM = (-0.4, 22.6)
@@ -68,10 +69,10 @@ def figure_hextuple(results):
     names = local_names(stone, readings)
     i = max(range(len(readings)), key=lambda k: readings[k].weight)
     r, n = readings[i], names[i]
-    ciic = slug(stone.get("CIIC", "stone"))
+    ciic = slug(stone_id(stone))
     t = reading_type(r)
     fig, ax = canvas(11.6)
-    title(ax, 11.0, f"A reading as a hextuple ({stone.get('title', '')}, CIIC {stone.get('CIIC', '')})")
+    title(ax, 11.0, f"A reading as a hextuple ({stone.get('title', '')}, {stone_ref(stone)})")
     mid = 5.9
     stmt = node(ax, 11.2, mid, 4.4, 2.2, "Statement", "axiom", size=11, sub=f"data:{n['statement']}", sub_size=7.5)
     subj = node(ax, 3.4, 9.5, 5.4, 1.6, f"stone_{ciic}", "instance", shape="oval", sub="OghamStone")
@@ -131,11 +132,11 @@ def figure_gigha(results):
     pitch = 2.1
     height = len(rs) * pitch + 3.4
     fig, ax = canvas(height)
-    title(ax, height - 0.5, f"{stone.get('title', '')} (CIIC {stone.get('CIIC', '')}): "
+    title(ax, height - 0.5, f"{stone.get('title', '')} ({stone_ref(stone)}): "
           f"{len(rs)} competing readings, one statement each")
     top = height - 1.5
     mid = top - (len(rs) * pitch) / 2 + pitch / 2 - 0.2
-    so = node(ax, 3.6, mid, 5.8, 2.0, f"stone_{slug(stone.get('CIIC', ''))}", "instance", shape="oval", sub="OghamStone")
+    so = node(ax, 3.6, mid, 5.8, 2.0, f"stone_{slug(stone_id(stone))}", "instance", shape="oval", sub="OghamStone")
     for k, r in enumerate(rs):
         y = top - k * pitch - 0.9
         text = r.text if len(r.text) <= 28 else r.text[:26] + "..."
@@ -155,9 +156,10 @@ SEGMENT = {None: (TINT, DARK), TYPE_TAG and "V": (MID, DARK), "U": (BRIGHT, WHIT
 
 
 def figure_spectrum(results):
-    fig, ax = plt.subplots(figsize=(W, 1.25 * len(results) + 1.7))
-    for k, (stone, readings, _) in enumerate(results):
-        y = len(results) - 1 - k
+    rows = [(stone, n, group) for stone, readings, _ in results for n, group in units(readings)]
+    fig, ax = plt.subplots(figsize=(W, 1.25 * len(rows) + 1.7))
+    for k, (stone, n, readings) in enumerate(rows):
+        y = len(rows) - 1 - k
         left = 0.0
         for r in ordered(readings):
             tag = TYPE_TAG[reading_type(r)] or None
@@ -167,27 +169,28 @@ def figure_spectrum(results):
                 ax.text(left + r.weight / 2, y, f"{r.editor}\n{r.weight:.4f}", ha="center", va="center",
                         fontsize=8, fontweight="bold", color=tc)
             left += r.weight
-        ax.text(0.0, y + 0.42, f"{stone.get('title', '')} (CIIC {stone.get('CIIC', '')}) - "
+        ax.text(0.0, y + 0.42, f"{inscription_label(stone, n)} - "
                 f"{len(readings)} reading{'s' if len(readings) != 1 else ''}",
                 fontsize=10.5, fontweight="bold", color=DARK, va="bottom")
     ax.set_xlim(0, 1)
-    ax.set_ylim(-0.6, len(results) - 0.1)
+    ax.set_ylim(-0.6, len(rows) - 0.1)
     ax.set_yticks([])
     ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
     ax.tick_params(axis="x", colors=DARK, labelsize=9)
-    ax.set_xlabel("share of the weight of the stone (the weights of one stone add up to 1)", color=DARK, fontsize=9)
+    ax.set_xlabel("share of the weight of the stone, or of the inscription (the weights of each add up to 1)",
+                  color=DARK, fontsize=9)
     for side in ("top", "right", "left"):
         ax.spines[side].set_visible(False)
     ax.spines["bottom"].set_color(DARK)
-    ax.set_title("Spectrum of doubt: the readings of four stones, coloured by FW type", loc="left",
-                 fontsize=14, fontweight="bold", color=DARK)
+    ax.set_title(f"Spectrum of doubt: the readings of {number_word(len(results))} stones, coloured by FW type",
+                 loc="left", fontsize=14, fontweight="bold", color=DARK)
     ax.legend(handles=[Patch(fc=TINT, ec=DARK, label="no type (single, unmarked reading)"),
                        Patch(fc=MID, ec=DARK, label="fw:Vagueness (c < 1)"),
                        Patch(fc=BRIGHT, ec=DARK, label="fw:Uncertainty (a < 1)"),
                        Patch(fc=DARK, ec=DARK, label="fw:FuzzinessWobbliness (both)")],
-              loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=4, frameon=False, fontsize=9,
-              labelcolor=DARK)
-    fig.subplots_adjust(left=0.015, right=0.975, top=0.9, bottom=0.2)
+              loc="upper center", bbox_to_anchor=(0.5, -0.16 if len(rows) <= 5 else -0.085),
+              ncol=4, frameon=False, fontsize=9, labelcolor=DARK)
+    fig.subplots_adjust(left=0.015, right=0.975, top=0.9 if len(rows) <= 5 else 0.93, bottom=0.2 if len(rows) <= 5 else 0.1)
     save(fig, "05_spectrum")
 
 

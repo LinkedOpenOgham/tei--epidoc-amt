@@ -8,8 +8,12 @@ sys.path.insert(0, str(ROOT / "py"))
 
 from rdflib import BNode, RDF, RDFS  # noqa: E402
 
-from ogham_amt_utils import AMT, DATA, FW, STONES  # noqa: E402
-from step_convert import analyse, build_graph, reading_type  # noqa: E402
+from rdflib import Namespace  # noqa: E402
+
+from ogham_amt_utils import AMT, DATA, FW, PROV, STONES  # noqa: E402
+from step_convert import analyse, build_graph, reading_type, units  # noqa: E402
+
+OGHAM = Namespace("http://ontology.ogham.link/")
 
 
 def graphs():
@@ -20,8 +24,10 @@ def graphs():
 
 class WeightTests(unittest.TestCase):
     def test_weights_add_up_to_one(self):
+        """Within each stone, or within each inscription of a file that holds several."""
         for base, _, readings, _ in graphs():
-            self.assertAlmostEqual(sum(r.weight for r in readings), 1.0, delta=0.0005, msg=base)
+            for n, group in units(readings):
+                self.assertAlmostEqual(sum(r.weight for r in group), 1.0, delta=0.0005, msg=f"{base} {n}")
 
     def test_single_unmarked_reading_has_weight_one(self):
         for base, _, readings, _ in graphs():
@@ -59,6 +65,37 @@ class HextupleTests(unittest.TestCase):
                 self.assertIn((ev[0], RDF.type, FW.TextEvidence), g)
                 self.assertEqual(str(g.value(ev[0], FW.sourceString)),
                                  str(g.value(g.value(s, RDF.object), RDFS.label)))
+
+
+class InscriptionTests(unittest.TestCase):
+    def test_readings_of_different_inscriptions_do_not_compete(self):
+        by = {base: (readings, g) for base, _, readings, g in graphs()}
+        readings, g = by["blackwaterfoot-1"]
+        self.assertEqual([n for n, _ in units(readings)], [1, 2])
+        subjects = set(g.objects(None, RDF.subject))
+        self.assertEqual(len(subjects), 2)
+        self.assertEqual(len(list(g.subject_objects(OGHAM.hasInscription))), 2)
+
+    def test_single_inscription_stones_keep_the_stone_as_subject(self):
+        for base, _, readings, g in graphs():
+            if base != "blackwaterfoot-1":
+                self.assertEqual([n for n, _ in units(readings)], [None], base)
+                self.assertEqual(list(g.subject_objects(OGHAM.hasInscription)), [], base)
+
+    def test_a_reading_without_source_has_no_editor(self):
+        for base, _, readings, g in graphs():
+            attributed = {s for s, _ in g.subject_objects(PROV.wasAttributedTo)}
+            for r in readings:
+                if not r.source_id:
+                    label = r.text
+                    nodes = [s for s in g.subjects(RDFS.label, None) if str(g.value(s, RDFS.label)) == label]
+                    self.assertTrue(nodes and not any(n in attributed for n in nodes), (base, label))
+
+
+class NamingTests(unittest.TestCase):
+    def test_records_without_a_ciic_number_are_named_by_file_name(self):
+        iris = {str(s) for base, _, _, g in graphs() if base in ("dyke", "bishop-loch") for s in g.subjects(AMT.instanceOf, OGHAM.OghamStone)}
+        self.assertEqual(iris, {"http://data.ogham.link/amt/stone_S_MOR_001", "http://data.ogham.link/amt/stone_S_LKS_X01"})
 
 
 class DeterminismTests(unittest.TestCase):

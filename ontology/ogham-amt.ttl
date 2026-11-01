@@ -1,6 +1,7 @@
 @prefix amt:  <http://academic-meta-tool.xyz/vocab#> .
 @prefix fw:   <http://w3id.org/fw_ontology/> .
 @prefix ogham: <http://ontology.ogham.link/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
@@ -12,16 +13,21 @@
 # out/*.amt.ttl, so that each output file is self-contained for the AMT runner;
 # py/step_docs.py reads the definitions below to write docs/model.html.
 #
-# Two concepts, one role, one method. There are no axioms: the graphs carry
-# weighted statements only (see the page "Run" for what that means for the
-# engine).
+# Three concepts, one role, one plain link, one method. There are no axioms: the
+# graphs carry weighted statements only (see the page "Run" for what that means
+# for the engine).
 # =============================================================================
 
 # ── Concepts ────────────────────────────────────────────────────────────────
 
 ogham:OghamStone a amt:Concept ;
     rdfs:label "Ogham stone" ;
-    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number." .
+    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .
+
+ogham:Inscription a amt:Concept ;
+    rdfs:label "Inscription" ;
+    rdfs:comment "One inscription on a monument whose record describes several (Blackwaterfoot 1 has two with a reading). It exists only for those records: for a record with one inscription, the stone stands for it." ;
+    skos:scopeNote "Not a text: the text is the reading. Readings of different inscriptions are not alternatives of each other, so their weights are computed within the inscription." .
 
 ogham:Reading a amt:Concept ;
     rdfs:label "Reading" ;
@@ -31,10 +37,17 @@ ogham:Reading a amt:Concept ;
 
 ogham:hasReading a amt:Role ;
     rdfs:label "has reading" ;
-    rdfs:domain ogham:OghamStone ;
     rdfs:range ogham:Reading ;
-    skos:definition "The stone is read this way by an editor. Each statement carries the weight of that reading among the readings of the stone." ;
-    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional." .
+    skos:definition "The stone, or its inscription where the record has several, is read this way by an editor. Each statement carries the weight of that reading among the readings of the same stone or inscription." ;
+    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. The subject is an ogham:OghamStone, or an ogham:Inscription in a record with several inscriptions; a formal domain is left out for that reason." .
+
+# A plain link, not a weighted statement: it says which inscription belongs to which monument.
+ogham:hasInscription a rdf:Property ;
+    rdfs:label "has inscription" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Inscription ;
+    skos:definition "The monument carries this inscription. Written only for records with several inscriptions." ;
+    skos:scopeNote "Carries no weight and is not an amt:Role: nothing is shared out among inscriptions." .
 
 # ── Method ──────────────────────────────────────────────────────────────────
 # The weight rule as a method individual of the FW ontology (fw:hasMethod). The

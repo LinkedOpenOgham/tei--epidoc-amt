@@ -16,7 +16,7 @@ Graph"*.
 
 For each stone it collects the competing readings and emits an AMT graph:
 
-- `amt:Concept` — the classes `OghamStone` and `Reading`
+- `amt:Concept` — the classes `OghamStone`, `Reading` and (only for a record with several inscriptions) `Inscription`
 - `amt:Role` — the relation `hasReading`
 - individuals — the stone and each reading, linked with `amt:instanceOf`
 - weighted edges — one reified quadruple (`rdf:subject` / `rdf:predicate` /
@@ -33,7 +33,7 @@ alternative from the apparatus (`<rdg>`). Stones with a single reading and no
 apparatus — the "clean" cases — yield exactly one edge with weight 1.0: the
 method adds no doubt where the source shows none.
 
-Four stones form a deliberate **spectrum of doubt**:
+Seven stones form a deliberate **spectrum of doubt**:
 
 | Stone | CIIC | Readings | Epistemic profile |
 |---|---|---|---|
@@ -41,6 +41,16 @@ Four stones form a deliberate **spectrum of doubt**:
 | Coomleagh East | 55 | 2 | two weighted alternatives |
 | Garranes | 81 | 1 | single reading, weight 1.0 (minor restorations) |
 | Ballinrannig 6 | 153 | 1 | single reading, weight 1.0 (no doubt markup) |
+| Dyke | – (`S-MOR-001`) | 1 | single reading, weight 1.0; the edition is marked `cert="low"`, which the rule does not read |
+| Blackwaterfoot 1 | – (`S-BUT-001`) | 4 + 4, per inscription | two inscriptions, each weighted on its own; four readings have no named editor |
+| Bishop Loch | – (`S-LKS-X01`) | 1 | single reading, weight 1.0; the doubt about the object is in prose only (the limit of the method) |
+
+A record without a CIIC number is named by its file name. A file that holds
+several inscriptions is read per inscription: readings of different
+inscriptions are not alternatives of each other, so each inscription is its own
+subject (`ogham:Inscription`, linked from the stone by `ogham:hasInscription`)
+and its weights add up to 1 on their own. A `<rdg>` without `@source` is not
+attributed to anyone.
 
 ## Repository structure
 
@@ -48,7 +58,7 @@ Four stones form a deliberate **spectrum of doubt**:
 tei--epidoc-amt/
 ├── data/                      # inputs (EpiDoc XML), unchanged
 ├── ontology/
-│   └── ogham-amt.ttl          # the domain model: 2 concepts, 1 role, 1 method
+│   └── ogham-amt.ttl          # the domain model: 3 concepts, 1 role, 1 link, 1 method
 ├── out/                       # generated outputs
 │   ├── README.md              # extraction, scores, c, AMT modelling (generated)
 │   └── *.amt.ttl              # one AMT graph per stone (generated)
@@ -90,7 +100,7 @@ Run from the repository root:
 python main.py
 ```
 
-This converts the four stones (`out/<stone>.amt.ttl` and `out/README.md`), draws
+This converts the seven stones (`out/<stone>.amt.ttl` and `out/README.md`), draws
 the diagrams, writes the documentation into `docs/` and runs the tests. The
 build has no clock in it: a second run changes no file.
 
@@ -118,7 +128,7 @@ The two SHACL files ship with the AMT engine
 
 ## Documentation
 
-The pages in `docs/` (model, vocabulary, weights, every reading of the four
+The pages in `docs/` (model, vocabulary, weights, every reading of the seven
 stones, how to run the check) are served by GitHub Pages when *Settings, Pages*
 points at the `/docs` folder of the main branch. They are written by
 `python main.py --only docs` from the ontology and the data.

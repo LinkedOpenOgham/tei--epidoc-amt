@@ -1,13 +1,15 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "tei--epidoc-amt: competing readings of ogham stones as weighted AMT statements"
-version: 0.2.1
-date-released: 2026-10-30
+version: 0.3.0
+date-released: 2026-11-01
 license: MIT
 repository-code: "https://github.com/LinkedOpenOgham/tei--epidoc-amt"
 authors:
   - family-names: Thiery
     given-names: Florian
+    orcid: "https://orcid.org/0000-0002-3246-3531"
+    affiliation: "LEIZA - Leibniz-Zentrum für Archäologie"
 keywords:
   - ogham
   - EpiDoc

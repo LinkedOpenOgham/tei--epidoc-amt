@@ -1,6 +1,6 @@
 rdflib>=7.0
 lxml>=5.0
 # The diagrams are written byte-identically only for the same matplotlib minor version
-# (glyph outlines enter the SVG as paths); 3.11 is the version the committed figures come from.
+# (glyph outlines enter the SVG as paths); 3.9 is the version the committed figures come from (3.9.2).
 matplotlib>=3.9
 pyshacl>=0.26   # optional, only needed for --shapes / --ontology

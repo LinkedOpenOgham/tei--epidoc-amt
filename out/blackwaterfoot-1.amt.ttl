@@ -1,0 +1,178 @@
+@prefix amt: <http://academic-meta-tool.xyz/vocab#> .
+@prefix data: <http://data.ogham.link/amt/> .
+@prefix fw: <http://w3id.org/fw_ontology/> .
+@prefix ogham: <http://ontology.ogham.link/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:stmt_S_BUT_001_i1_EOMEDTE_or_EOMEQE amt:weight 0.2769 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i1_EOMEDTE_or_EOMEQE ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:Uncertainty ;
+    rdf:object data:reading_S_BUT_001_i1_EOMEDTE_or_EOMEQE ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_1 .
+
+data:stmt_S_BUT_001_i1_EVLEMOE_or_ENEMOE amt:weight 0.2769 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i1_EVLEMOE_or_ENEMOE ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:Uncertainty ;
+    rdf:object data:reading_S_BUT_001_i1_EVLEMOE_or_ENEMOE ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_1 .
+
+data:stmt_S_BUT_001_i1_H_i_e_OMEQ_i_e amt:weight 0.3077 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i1_H_i_e_OMEQ_i_e ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:FuzzinessWobbliness ;
+    rdf:object data:reading_S_BUT_001_i1_H_i_e_OMEQ_i_e ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_1 .
+
+data:stmt_S_BUT_001_i1_OGHAM_KF amt:weight 0.1385 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i1_OGHAM_KF ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:FuzzinessWobbliness ;
+    rdf:object data:reading_S_BUT_001_i1_OGHAM_KF ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_1 .
+
+data:stmt_S_BUT_001_i2_FIS2001 amt:weight 0.2609 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i2_FIS2001 ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:Uncertainty ;
+    rdf:object data:reading_S_BUT_001_i2_FIS2001 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_2 .
+
+data:stmt_S_BUT_001_i2_FOR1996 amt:weight 0.1304 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i2_FOR1996 ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:Uncertainty ;
+    rdf:object data:reading_S_BUT_001_i2_FOR1996 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_2 .
+
+data:stmt_S_BUT_001_i2_FOR1996_2 amt:weight 0.3913 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i2_FOR1996_2 ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:Uncertainty ;
+    rdf:object data:reading_S_BUT_001_i2_FOR1996_2 ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_2 .
+
+data:stmt_S_BUT_001_i2_OGHAM_KF amt:weight 0.2174 ;
+    fw:derivedFrom data:evidence_S_BUT_001_i2_OGHAM_KF ;
+    fw:hasMethod ogham:ConfidenceAgreementRule ;
+    fw:hasType fw:FuzzinessWobbliness ;
+    rdf:object data:reading_S_BUT_001_i2_OGHAM_KF ;
+    rdf:predicate ogham:hasReading ;
+    rdf:subject data:inscription_S_BUT_001_2 .
+
+data:stone_S_BUT_001 rdfs:label "Blackwaterfoot 1 (S-BUT-001)" ;
+    amt:instanceOf ogham:OghamStone ;
+    ogham:hasInscription data:inscription_S_BUT_001_1,
+        data:inscription_S_BUT_001_2 .
+
+ogham:hasInscription a rdf:Property ;
+    rdfs:label "has inscription" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Inscription ;
+    skos:definition "The monument carries this inscription. Written only for records with several inscriptions." ;
+    skos:scopeNote "Carries no weight and is not an amt:Role: nothing is shared out among inscriptions." .
+
+data:agent_FIS2001 a prov:Agent ;
+    rdfs:label "Fis 2001" .
+
+data:evidence_S_BUT_001_i1_EOMEDTE_or_EOMEQE a fw:TextEvidence ;
+    fw:sourceString "EOMEDTE or EOMEQE" .
+
+data:evidence_S_BUT_001_i1_EVLEMOE_or_ENEMOE a fw:TextEvidence ;
+    fw:sourceString "EVLEMOE or ENEMOE" .
+
+data:evidence_S_BUT_001_i1_H_i_e_OMEQ_i_e a fw:TextEvidence ;
+    fw:sourceString "H(i/e)OMEQ(i/e)[~]" .
+
+data:evidence_S_BUT_001_i1_OGHAM_KF a fw:TextEvidence ;
+    fw:sourceString "[---]MEQE[---]" .
+
+data:evidence_S_BUT_001_i2_FIS2001 a fw:TextEvidence ;
+    fw:sourceString "LUEDBH" .
+
+data:evidence_S_BUT_001_i2_FOR1996 a fw:TextEvidence ;
+    fw:sourceString "ADLEUV" .
+
+data:evidence_S_BUT_001_i2_FOR1996_2 a fw:TextEvidence ;
+    fw:sourceString "BLUEDLA" .
+
+data:evidence_S_BUT_001_i2_OGHAM_KF a fw:TextEvidence ;
+    fw:sourceString "[---]VUEDLA" .
+
+data:reading_S_BUT_001_i1_EOMEDTE_or_EOMEQE rdfs:label "EOMEDTE or EOMEQE" ;
+    amt:instanceOf ogham:Reading .
+
+data:reading_S_BUT_001_i1_EVLEMOE_or_ENEMOE rdfs:label "EVLEMOE or ENEMOE" ;
+    amt:instanceOf ogham:Reading .
+
+data:reading_S_BUT_001_i1_H_i_e_OMEQ_i_e rdfs:label "H(i/e)OMEQ(i/e)[~]" ;
+    amt:instanceOf ogham:Reading .
+
+data:reading_S_BUT_001_i1_OGHAM_KF rdfs:label "[---]MEQE[---]" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_KF .
+
+data:reading_S_BUT_001_i2_FIS2001 rdfs:label "LUEDBH" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_FIS2001 .
+
+data:reading_S_BUT_001_i2_FOR1996 rdfs:label "ADLEUV" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_FOR1996 .
+
+data:reading_S_BUT_001_i2_FOR1996_2 rdfs:label "BLUEDLA" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_FOR1996 .
+
+data:reading_S_BUT_001_i2_OGHAM_KF rdfs:label "[---]VUEDLA" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_KF .
+
+data:agent_FOR1996 a prov:Agent ;
+    rdfs:label "Forsyth 1996" .
+
+data:agent_OGHAM_KF a prov:Agent ;
+    rdfs:label "OG(H)AM edition (KF)" .
+
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" ;
+    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .
+
+ogham:Inscription a amt:Concept ;
+    rdfs:label "Inscription" ;
+    rdfs:comment "One inscription on a monument whose record describes several (Blackwaterfoot 1 has two with a reading). It exists only for those records: for a record with one inscription, the stone stands for it." ;
+    skos:scopeNote "Not a text: the text is the reading. Readings of different inscriptions are not alternatives of each other, so their weights are computed within the inscription." .
+
+data:inscription_S_BUT_001_1 rdfs:label "Blackwaterfoot 1, inscription 1 (S-BUT-001)" ;
+    amt:instanceOf ogham:Inscription .
+
+data:inscription_S_BUT_001_2 rdfs:label "Blackwaterfoot 1, inscription 2 (S-BUT-001)" ;
+    amt:instanceOf ogham:Inscription .
+
+ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
+    rdfs:label "confidence times agreement rule"@en ;
+    fw:formula "c(r) * a(r) / sum(c * a)" ;
+    fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> ;
+    rdfs:comment "Weight of a reading among the readings of one stone: the reading confidence c(r) (from the doubt markup of the reading) times the tradition agreement a(r) (the share of readings that cluster with it), divided by the sum of these products over all readings of the stone. Four decimals."@en .
+
+ogham:hasReading a amt:Role ;
+    rdfs:label "has reading" ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone, or its inscription where the record has several, is read this way by an editor. Each statement carries the weight of that reading among the readings of the same stone or inscription." ;
+    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. The subject is an ogham:OghamStone, or an ogham:Inscription in a record with several inscriptions; a formal domain is left out for that reason." .
+
+ogham:Reading a amt:Concept ;
+    rdfs:label "Reading" ;
+    rdfs:comment "One transliteration of the inscription: either the current edition of the OG(H)AM team or a historical reading from the apparatus of the EpiDoc file." .
