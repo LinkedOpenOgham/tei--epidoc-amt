@@ -19,7 +19,7 @@ Source: [PNG](diagrams/01_model.png), drawn by `py/step_diagrams.py` from the da
 
 ## One statement as a hextuple
 
-AMT stores a weighted statement as a reified triple plus the weight. Release 0.3.0 adds the
+AMT stores a weighted statement as a reified triple plus the weight. Release 0.4.0 adds the
 three annotations of the hextuple of AMT.engine 0.6.0: the type of the doubt, the method that produced the
 weight, and the evidence it was derived from. The quadruple core (subject, predicate, object, weight) is
 unchanged; the committed Turtle of release 0.1 and the new Turtle agree on every quadruple.

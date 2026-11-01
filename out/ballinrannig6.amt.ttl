@@ -15,12 +15,25 @@ data:stmt_153_OGHAM_NW amt:weight 1.0000 ;
     rdf:predicate ogham:hasReading ;
     rdf:subject data:stone_153 .
 
+ogham:ConfidenceCertAgreementRule a fw:RuleBasedMethod ;
+    rdfs:label "confidence times certainty times agreement rule"@en ;
+    fw:formula "c(r) * k(cert) * a(r) / sum(c * k * a)" ;
+    fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> ;
+    rdfs:comment "Rule v1 with the certainty of the edition as a further factor: weight of a reading among the readings of one stone (or inscription) is c(r) times k(cert) times a(r), divided by the sum of these products. k is the GSAS degree of the level given by the @cert of the edition (low 0.6469, medium 0.8517, high 0.9690), and 1 for an edition without @cert and for every apparatus reading. Four decimals."@en .
+
 ogham:hasInscription a rdf:Property ;
     rdfs:label "has inscription" ;
     rdfs:domain ogham:OghamStone ;
     rdfs:range ogham:Inscription ;
     skos:definition "The monument carries this inscription. Written only for records with several inscriptions." ;
     skos:scopeNote "Carries no weight and is not an amt:Role: nothing is shared out among inscriptions." .
+
+ogham:recordStatus a rdf:Property ;
+    rdfs:label "record status" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range xsd:string ;
+    skos:definition "Whether the record is numbered, lost or doubtful, as the series letter of its identifier says." ;
+    skos:scopeNote "Says nothing about the reading and does not change any weight: a stone with one reading has weight 1 whatever its status. Proposed term." .
 
 data:agent_OGHAM_NW a prov:Agent ;
     rdfs:label "OG(H)AM edition (NW)" .
@@ -33,7 +46,8 @@ data:reading_153_OGHAM_NW rdfs:label "CCICAMINIvac. MAQQ[/I] C[A]TTINI" ;
     prov:wasAttributedTo data:agent_OGHAM_NW .
 
 data:stone_153 rdfs:label "Baile an Reannaigh | Ballinrannig 6 (CIIC 153)" ;
-    amt:instanceOf ogham:OghamStone .
+    amt:instanceOf ogham:OghamStone ;
+    ogham:recordStatus "numbered" .
 
 ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
     rdfs:label "confidence times agreement rule"@en ;
@@ -52,10 +66,10 @@ ogham:hasReading a amt:Role ;
     skos:definition "The stone, or its inscription where the record has several, is read this way by an editor. Each statement carries the weight of that reading among the readings of the same stone or inscription." ;
     skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. The subject is an ogham:OghamStone, or an ogham:Inscription in a record with several inscriptions; a formal domain is left out for that reason." .
 
-ogham:OghamStone a amt:Concept ;
-    rdfs:label "Ogham stone" ;
-    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .
-
 ogham:Reading a amt:Concept ;
     rdfs:label "Reading" ;
     rdfs:comment "One transliteration of the inscription: either the current edition of the OG(H)AM team or a historical reading from the apparatus of the EpiDoc file." .
+
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" ;
+    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .

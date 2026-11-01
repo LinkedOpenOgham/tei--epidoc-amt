@@ -12,6 +12,7 @@ from rdflib import Namespace  # noqa: E402
 
 from ogham_amt_utils import AMT, DATA, FW, PROV, STONES  # noqa: E402
 from step_convert import analyse, build_graph, reading_type, units  # noqa: E402
+from ogham_amt_utils import CERT_FACTOR, record_status  # noqa: E402
 
 OGHAM = Namespace("http://ontology.ogham.link/")
 
@@ -90,6 +91,43 @@ class InscriptionTests(unittest.TestCase):
                     label = r.text
                     nodes = [s for s in g.subjects(RDFS.label, None) if str(g.value(s, RDFS.label)) == label]
                     self.assertTrue(nodes and not any(n in attributed for n in nodes), (base, label))
+
+
+class RuleV2Tests(unittest.TestCase):
+    def test_v2_weights_add_up_to_one_and_only_cert_stones_change(self):
+        for f, base in STONES:
+            _, v1 = analyse(DATA / f)
+            _, v2 = analyse(DATA / f, "v2")
+            for n, group in units(v2):
+                self.assertAlmostEqual(sum(r.weight for r in group), 1.0, delta=0.0005, msg=base)
+            if not any(r.cert for r in v1):
+                self.assertEqual([r.weight for r in v1], [r.weight for r in v2], base)
+
+    def test_cert_factor_is_applied_to_the_edition_only(self):
+        _, v1 = analyse(DATA / "S-ARL-001.xml")
+        _, v2 = analyse(DATA / "S-ARL-001.xml", "v2")
+        for a, b in zip(v1, v2):
+            expected = round(a.confidence * CERT_FACTOR[a.cert], 4) if a.cert else a.confidence
+            self.assertEqual(b.confidence, expected, a.editor)
+
+    def test_v2_names_its_own_method(self):
+        stone, readings = analyse(DATA / "S-ARL-001.xml", "v2")
+        g = build_graph(stone, readings, "v2")
+        self.assertEqual({str(o) for o in g.objects(None, FW.hasMethod)},
+                         {"http://ontology.ogham.link/ConfidenceCertAgreementRule"})
+
+
+class StatusTests(unittest.TestCase):
+    def test_record_status_from_the_series_letter(self):
+        self.assertEqual([record_status(i) for i in ("S-MOR-001", "I-FER-X01", "S-XXX-L01", "I-COR-001")],
+                         ["numbered", "doubtful", "lost", "numbered"])
+
+    def test_every_stone_carries_its_status(self):
+        for base, stone, _, g in graphs():
+            status = {str(o) for o in g.objects(None, OGHAM.recordStatus)}
+            self.assertEqual(status, {record_status(stone["filename"])}, base)
+        self.assertIn("doubtful", {str(o) for base, _, _, g in graphs() if base == "bishop-loch"
+                                   for o in g.objects(None, OGHAM.recordStatus)})
 
 
 class NamingTests(unittest.TestCase):

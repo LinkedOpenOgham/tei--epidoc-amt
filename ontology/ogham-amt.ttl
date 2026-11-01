@@ -4,6 +4,7 @@
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
 # =============================================================================
 # Domain model of tei--epidoc-amt in the AMT vocabulary
@@ -49,6 +50,15 @@ ogham:hasInscription a rdf:Property ;
     skos:definition "The monument carries this inscription. Written only for records with several inscriptions." ;
     skos:scopeNote "Carries no weight and is not an amt:Role: nothing is shared out among inscriptions." .
 
+# Status of the record, read from the series letter of its identifier (none: numbered, L: lost,
+# X: doubtful). The same term, with the same meaning, as in tei--epidoc-crosswalk. A proposed term.
+ogham:recordStatus a rdf:Property ;
+    rdfs:label "record status" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range xsd:string ;
+    skos:definition "Whether the record is numbered, lost or doubtful, as the series letter of its identifier says." ;
+    skos:scopeNote "Says nothing about the reading and does not change any weight: a stone with one reading has weight 1 whatever its status. Proposed term." .
+
 # ── Method ──────────────────────────────────────────────────────────────────
 # The weight rule as a method individual of the FW ontology (fw:hasMethod). The
 # FW ontology has fw:EqualShareRule for the AND / OR / '?' strings of the Samian
@@ -59,4 +69,15 @@ ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
     rdfs:label "confidence times agreement rule"@en ;
     rdfs:comment "Weight of a reading among the readings of one stone: the reading confidence c(r) (from the doubt markup of the reading) times the tradition agreement a(r) (the share of readings that cluster with it), divided by the sum of these products over all readings of the stone. Four decimals."@en ;
     fw:formula "c(r) * a(r) / sum(c * a)" ;
+    fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> .
+
+# Rule v2: the same rule, with the @cert of the edition as a factor k in c(r). The values of k are the degrees
+# of the 4-level layer of GSAS (Research-Squirrel-Engineers/GSAS, commit bdbe0fb): low 0.6469
+# (skosplus:relatedMatchLow), medium 0.8517 (relatedMatchMedium), high 0.9690 (relatedMatchHigh), no @cert 1.
+# Rule v1 stays; the two are written to out/ and out/v2/.
+
+ogham:ConfidenceCertAgreementRule a fw:RuleBasedMethod ;
+    rdfs:label "confidence times certainty times agreement rule"@en ;
+    rdfs:comment "Rule v1 with the certainty of the edition as a further factor: weight of a reading among the readings of one stone (or inscription) is c(r) times k(cert) times a(r), divided by the sum of these products. k is the GSAS degree of the level given by the @cert of the edition (low 0.6469, medium 0.8517, high 0.9690), and 1 for an edition without @cert and for every apparatus reading. Four decimals."@en ;
+    fw:formula "c(r) * k(cert) * a(r) / sum(c * k * a)" ;
     fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> .

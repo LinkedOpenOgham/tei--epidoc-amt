@@ -86,9 +86,30 @@ Two more things the weight does not say, both visible in the stones of release 0
   with two `<gap>` elements, so its weight is 1.0000 and its type `fw:Vagueness`. Whether the object is an
   ogham inscription at all is said only in prose in the record (see [Stones](stones.html)); no element
   carries it, so no weight can.
-- **It does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
+- **Rule v1 does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
   on its `<div>`. Rule v1 counts `unclear`, `supplied` and `gap` and ignores the attribute, so the
-  doubt the editors put on the whole edition is not in c(r)."""
+  doubt the editors put on the whole edition is not in c(r). Rule v2 reads it (next section).
+
+## Rule v2: the certainty of the edition
+
+Rule v2 is rule v1 with one more factor: the `@cert` of the edition multiplies c(r) by k. The values of k are
+the degrees of the 4-level layer of [GSAS](https://github.com/Research-Squirrel-Engineers/GSAS) (Gradual
+Semantic Alignment for SKOS, commit `bdbe0fb`, `skos_4level/skos_4level_degrees.csv`), rounded to four
+decimals, and the TEI levels map to them one to one:
+
+| `@cert` | GSAS level | k |
+|---|---|---|
+| `low` | `skosplus:relatedMatchLow` | 0.6469 |
+| `medium` | `skosplus:relatedMatchMedium` | 0.8517 |
+| `high` | `skosplus:relatedMatchHigh` | 0.9690 |
+| none | | 1 |
+
+The apparatus readings have no `@cert`, so k = 1 for them. v2 is written next to v1, not instead of it:
+`out/*.amt.ttl` is v1 (`ogham:ConfidenceAgreementRule`), `out/v2/*.amt.ttl` is v2
+(`ogham:ConfidenceCertAgreementRule`). The mapping of the TEI levels to the GSAS levels, and the use of a
+product, are proposals to be reviewed. A stone with one reading keeps weight 1 under v2 as well, because the
+weights are shares: v2 changes only the weights of a stone whose readings compete. Of the seven stones, that is
+Gigha 1 (the edition carries `cert="low"`); the comparison is on the page [Stones](stones.html)."""
 
 REVIEW_QUESTIONS = """## Questions for review
 
@@ -106,7 +127,8 @@ REVIEW_QUESTIONS = """## Questions for review
 STONE_NOTES = {
     "dyke": """The record has no CIIC number; its file name `S-MOR-001` names it. The note in the apparatus speaks
 of three inscriptions, but the file holds one transliteration of three lines, which is one reading here.
-The edition carries `cert="low"` on its `<div>`, which the weight does not read (see [Weights](weights.html)).""",
+The edition carries `cert="low"` on its `<div>`: rule v1 does not read it, rule v2 does (see [Weights](weights.html)); the
+weight stays 1.0000 under both, because there is no other reading to share it with.""",
     "blackwaterfoot-1": """The file holds several inscriptions, and the notes of the apparatus say which reading belongs to
 which ("For the second inscription, ..."). Each inscription with a reading is its own subject
 (`ogham:Inscription`, linked by `ogham:hasInscription`), and its weights add up to 1 on their own: the
@@ -118,7 +140,7 @@ Four of the apparatus readings have no `@source`; the note names the editor in p
 of `FOR1996` on the second inscription are two nodes in this graph.""",
     "bishop-loch": """The record has no CIIC number; its identifier carries the series letter X, which the sister
 repository [tei--epidoc-crosswalk](https://github.com/LinkedOpenOgham/tei--epidoc-crosswalk) exports as
-`ogham:recordStatus "doubtful"`. The record calls the markings "purported" and
+`ogham:recordStatus "doubtful"`; so does this graph. The record calls the markings "purported" and
 "alleged" and the object a stick "bearing ogham-like markings", in prose only. The only
 markup in the edition is two `<gap>` elements. That is the **limit of the method**: the single reading has
 weight 1.0000 and type `fw:Vagueness` (c = 0.60 from the gaps), and neither says that the object may not

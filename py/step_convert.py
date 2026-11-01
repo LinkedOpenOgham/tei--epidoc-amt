@@ -60,7 +60,7 @@ from rdflib.namespace import RDF, RDFS, XSD  # noqa: E402
 
 from ogham_amt_utils import (  # noqa: E402
     AMT, DATA, DATA_NS, FW, FW_FUZZINESS_WOBBLINESS, FW_UNCERTAINTY, FW_VAGUENESS, OGHAM, ONTOLOGY,
-    OUT, PROV, SKOS, STONES, TEI, TYPE_CURIE, TYPE_TAG, rel, slug, write_text,
+    CERT_FACTOR, OUT, OUT_V2, PROV, SKOS, STONES, TEI, TYPE_CURIE, TYPE_TAG, record_status, rel, slug, write_text,
 )
 
 # --- documented weighting constants ------------------------------------------
@@ -70,7 +70,8 @@ UNCERTAIN_CHARS = set("[]()?/\\-.:")   # editor-introduced doubt markers in a re
 MARKER_PENALTY = {"unclear": 0.5, "supplied": 0.7, "gap": 1.0}
 BASE_CONFIDENCE = {"legible": 1.0, "unclear": 0.5, "supplied": 0.3, "gap": 0.0}
 FUZZY_LOGIC = "amt:ProductLogic"       # operator the engine should use if axioms are added later
-METHOD = OGHAM.ConfidenceAgreementRule  # fw:hasMethod of every statement (ontology/ogham-amt.ttl)
+METHOD = OGHAM.ConfidenceAgreementRule  # fw:hasMethod of every statement under rule v1 (ontology/ogham-amt.ttl)
+METHODS = {"v1": METHOD, "v2": OGHAM.ConfidenceCertAgreementRule}
 
 EDITOR_PREFIXES = {"RHY": "Rhys", "MAC": "Macalister", "DIA": "Diack",
                    "JAC": "Jackson", "FOR": "Forsyth"}
@@ -94,6 +95,7 @@ class Reading:
     text: str
     is_edition: bool = False
     inscription: int | None = None   # n of the inscription in a file that holds several; None otherwise
+    cert: str | None = None          # @cert of the edition div (low, medium, high), if it has one
     confidence: float = 1.0
     agreement: float = 0.0
     weight: float = 0.0
@@ -208,6 +210,7 @@ def parse_readings(tree) -> list[Reading]:
             source_id=f"OGHAM_{resp}", editor=f"OG(H)AM edition ({resp})",
             text=txt, is_edition=True, confidence=c,
             inscription=int(n) if several and n else None,
+            cert=div.get("cert") if div.get("cert") in CERT_FACTOR else None,
             signals={"kind": "edition", "unclear": U, "supplied": S, "gap": G, "length": L}))
 
     for rdg in tree.findall(f".//{{{TEI}}}rdg"):
@@ -269,13 +272,22 @@ def reading_type(r: Reading):
     return None
 
 
-def analyse(input_path: Path) -> tuple[dict, list[Reading]]:
-    """Parse one EpiDoc file: the stone's identifiers and its weighted readings."""
+def analyse(input_path: Path, rule: str = "v1") -> tuple[dict, list[Reading]]:
+    """Parse one EpiDoc file: the stone's identifiers and its weighted readings.
+
+    Rule v1 is the original rule. Rule v2 multiplies c of an edition that carries ``@cert`` by the
+    GSAS degree of that level (``CERT_FACTOR``); the readings of the apparatus have no ``@cert``.
+    """
     tree = etree.parse(str(input_path))
     stone = parse_stone(tree)
     readings = parse_readings(tree)
     if not readings:
         raise SystemExit(f"No readings found in {input_path.name}")
+    if rule == "v2":
+        for r in readings:
+            if r.cert:
+                r.signals["k"] = CERT_FACTOR[r.cert]
+                r.confidence = round(r.confidence * CERT_FACTOR[r.cert], 4)
     compute_weights(readings)
     return stone, readings
 
@@ -317,7 +329,7 @@ def subject_iri(stone: dict, inscription):
     return DATA_NS[f"inscription_{slug(stone_id(stone))}_{inscription}"]
 
 
-def build_graph(stone: dict, readings: list[Reading]) -> Graph:
+def build_graph(stone: dict, readings: list[Reading], rule: str = "v1") -> Graph:
     g = Graph()
     g.parse(str(ONTOLOGY), format="turtle")          # concepts, role, method
     for pfx, ns in (("amt", AMT), ("fw", FW), ("ogham", OGHAM), ("data", DATA_NS),
@@ -327,6 +339,7 @@ def build_graph(stone: dict, readings: list[Reading]) -> Graph:
     s_uri = stone_iri(stone)
     g.add((s_uri, AMT.instanceOf, OGHAM.OghamStone))
     g.add((s_uri, RDFS.label, Literal(inscription_label(stone, None))))
+    g.add((s_uri, OGHAM.recordStatus, Literal(record_status(stone.get("filename", "")))))
     for n, _ in units(readings):
         if n is not None:                            # a file with several inscriptions
             i_uri = subject_iri(stone, n)
@@ -352,7 +365,7 @@ def build_graph(stone: dict, readings: list[Reading]) -> Graph:
         t = reading_type(r)
         if t is not None:
             g.add((st, FW.hasType, t))
-        g.add((st, FW.hasMethod, METHOD))
+        g.add((st, FW.hasMethod, METHODS[rule]))
         g.add((st, FW.derivedFrom, ev))
         g.add((ev, RDF.type, FW.TextEvidence))
         g.add((ev, FW.sourceString, Literal(r.text)))
@@ -363,13 +376,18 @@ def build_graph(stone: dict, readings: list[Reading]) -> Graph:
 def _signals_str(r: Reading) -> str:
     s = r.signals
     if s.get("kind") == "edition":
-        return f"{s['unclear']}× `<unclear>`, {s['supplied']}× `<supplied>`, {s['gap']}× `<gap>`"
+        cert = f", `@cert` {r.cert}" if r.cert else ""
+        return f"{s['unclear']}× `<unclear>`, {s['supplied']}× `<supplied>`, {s['gap']}× `<gap>`{cert}"
     return f"proxy: {s['unclean']} editor-marked char(s) of {s['length']}"
 
 
 def _c_formula(r: Reading) -> str:
     s = r.signals
     if s.get("kind") == "edition":
+        if "k" in s:
+            base = 1 - (0.5 * s["unclear"] + 0.7 * s["supplied"] + 1.0 * s["gap"]) / s["length"]
+            return (f"(1 − (0.5·{s['unclear']} + 0.7·{s['supplied']} + 1.0·{s['gap']}) / {s['length']}) · "
+                    f"k({r.cert}) = {max(0.0, base):.2f} · {s['k']} = **{r.confidence:.2f}**")
         return (f"1 − (0.5·{s['unclear']} + 0.7·{s['supplied']} + 1.0·{s['gap']}) / "
                 f"{s['length']} = **{r.confidence:.2f}**")
     return f"1 − {s['unclean']} / {s['length']} = **{r.confidence:.2f}**"
@@ -437,6 +455,10 @@ def write_out_readme(results: list[tuple[dict, list[Reading], str]]) -> None:
         f"(string similarity ≥ {AGREEMENT_THRESHOLD}). The weight is the normalised product\n")
     add("```\namt:weight(r) = c(r)·a(r) / Σ c·a          (Σ over the alternatives = 1)\n```\n")
 
+    add("**Rule v2** (written to `out/v2/`, next to v1) multiplies c of an edition that carries `@cert` by the "
+        "GSAS degree of that level: `low` 0.6469, `medium` 0.8517, `high` 0.9690 (4-level layer of "
+        "[GSAS](https://github.com/Research-Squirrel-Engineers/GSAS)); everything else is as in v1. The tables "
+        "below are rule v1; the comparison is on the page *Stones* of the documentation.\n")
     add("## 3. How the FW type is set\n")
     add("The type names the factor that pulled the raw weight below 1. It does not change the weight.\n")
     add("| c < 1 (imprecise reading) | a < 1 (other readings disagree) | `fw:hasType` |")
@@ -499,19 +521,20 @@ def run_shacl(ttl_path: Path, shapes: Path, ontology: Path) -> bool:
     return ok
 
 
-def process(input_path: Path, output_path: Path, shapes=None, ontology=None):
-    stone, readings = analyse(input_path)
+def process(input_path: Path, output_path: Path, shapes=None, ontology=None, rule: str = "v1"):
+    stone, readings = analyse(input_path, rule)
 
     n_ed = sum(1 for r in readings if r.is_edition)
-    print(f"\n{stone.get('title', '?')} ({stone_ref(stone)}) "
-          f"-- {len(readings)} reading(s): {n_ed} edition + {len(readings) - n_ed} historical")
-    for r in sorted(readings, key=lambda x: (-x.weight, x.source_id)):
-        tag = "EDITION" if r.is_edition else "hist.  "
-        part = "" if r.inscription is None else f"i{r.inscription} "
-        print(f"  [{tag}] {part}{r.editor:22} c={r.confidence:.2f} a={r.agreement:.2f} "
-              f"w={r.weight:.4f} {TYPE_TAG[reading_type(r)]:>2}  {r.text[:46]}")
+    if rule == "v1":
+        print(f"\n{stone.get('title', '?')} ({stone_ref(stone)}) "
+              f"-- {len(readings)} reading(s): {n_ed} edition + {len(readings) - n_ed} historical")
+        for r in sorted(readings, key=lambda x: (-x.weight, x.source_id)):
+            tag = "EDITION" if r.is_edition else "hist.  "
+            part = "" if r.inscription is None else f"i{r.inscription} "
+            print(f"  [{tag}] {part}{r.editor:22} c={r.confidence:.2f} a={r.agreement:.2f} "
+                  f"w={r.weight:.4f} {TYPE_TAG[reading_type(r)]:>2}  {r.text[:46]}")
 
-    g = build_graph(stone, readings)
+    g = build_graph(stone, readings, rule)
     write_text(output_path, g.serialize(format="turtle"))
     status = ""
     if shapes and ontology:
@@ -534,6 +557,9 @@ def main(argv: list[str] | None = None) -> int:
     else:
         results = [process(DATA / f, OUT / f"{b}.amt.ttl", args.shapes, args.ontology)
                    for f, b in STONES]
+        print("\nRule v2 (@cert of the edition as a factor, GSAS degrees):")
+        for f, b in STONES:
+            process(DATA / f, OUT_V2 / f"{b}.amt.ttl", args.shapes, args.ontology, rule="v2")
         write_out_readme(results)
     if not (args.shapes and args.ontology):
         print("\n(SHACL skipped -- pass --shapes amt-shapes.ttl --ontology amt.ttl to validate)")

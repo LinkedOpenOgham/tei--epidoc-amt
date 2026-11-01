@@ -27,6 +27,13 @@ For each stone it collects the competing readings and emits an AMT graph:
   and the **evidence** it was derived from (`fw:derivedFrom`), as in
   AMT.engine 0.6.0
 
+- record status (since 0.4.0) — `ogham:recordStatus` on the stone: `numbered`,
+  `lost` or `doubtful`, read from the series letter of the identifier, as in the crosswalk
+- two rules (since 0.4.0) — `out/*.amt.ttl` follows rule v1; `out/v2/*.amt.ttl`
+  follows rule v2, which multiplies c of an edition that carries `@cert` by the
+  [GSAS](https://github.com/Research-Squirrel-Engineers/GSAS) degree of that level
+  (low 0.6469, medium 0.8517, high 0.9690)
+
 A *reading* is either the **current edition** (the `<div type="edition">`
 transliteration, attributed to the OG(H)AM editor) or a **historical**
 alternative from the apparatus (`<rdg>`). Stones with a single reading and no
@@ -61,7 +68,8 @@ tei--epidoc-amt/
 │   └── ogham-amt.ttl          # the domain model: 3 concepts, 1 role, 1 link, 1 method
 ├── out/                       # generated outputs
 │   ├── README.md              # extraction, scores, c, AMT modelling (generated)
-│   └── *.amt.ttl              # one AMT graph per stone (generated)
+│   ├── *.amt.ttl              # one AMT graph per stone, rule v1 (generated)
+│   └── v2/*.amt.ttl           # the same under rule v2 (generated)
 ├── docs/                      # GitHub Pages: model, vocabulary, weights, stones, run
 │   ├── _config.yml, _layouts/, assets/    # Jekyll shell and logo (sources)
 │   └── *.md, diagrams/        # generated
@@ -100,7 +108,7 @@ Run from the repository root:
 python main.py
 ```
 
-This converts the seven stones (`out/<stone>.amt.ttl` and `out/README.md`), draws
+This converts the seven stones (`out/<stone>.amt.ttl`, `out/v2/<stone>.amt.ttl` and `out/README.md`), draws
 the diagrams, writes the documentation into `docs/` and runs the tests. The
 build has no clock in it: a second run changes no file.
 
@@ -199,6 +207,11 @@ Gigha 1 records six historical readings, but two of them (Diack 1926, Jackson
 reference). The converter therefore processes the **four active** historical
 readings plus the current edition; it will pick up the other two automatically
 once the OG(H)AM team un-comments them.
+
+## Data licence
+
+The OG(H)AM editions in `data/` declare **CC BY 4.0** in their `<licence>` element
+(teiHeader). The code in this repository is MIT (`LICENSE`).
 
 ## Context
 

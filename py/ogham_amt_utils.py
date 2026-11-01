@@ -13,14 +13,15 @@ from pathlib import Path
 
 from rdflib import Namespace
 
-RELEASE = "0.3.0"
+RELEASE = "0.4.0"
 
 GITHUB = "https://github.com/LinkedOpenOgham/tei--epidoc-amt"
 BLOB = GITHUB + "/blob/main/"
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"                              # inputs: EpiDoc XML, unchanged
-OUT = ROOT / "out"                                # products: AMT Turtle and out/README.md
+OUT = ROOT / "out"                                # products: AMT Turtle (rule v1) and out/README.md
+OUT_V2 = OUT / "v2"                               # the same stones under rule v2 (cert on the edition)
 ONTOLOGY = ROOT / "ontology" / "ogham-amt.ttl"    # the domain model, single source of truth
 DOCS = ROOT / "docs"                              # GitHub Pages
 IMG = DOCS / "diagrams"
@@ -80,3 +81,25 @@ def write_text(path: Path, text: str) -> None:
     """Write UTF-8 with LF line endings and one trailing newline, on every platform."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text.rstrip("\n") + "\n", encoding="utf-8", newline="\n")
+
+
+# Record status from the series letter of the identifier (S-LKS-X01 -> X). Same rule and same terms as
+# tei--epidoc-crosswalk (py/worklist.py): no letter numbered, L lost, X doubtful.
+SERIES_STATUS = {"": "numbered", "L": "lost", "X": "doubtful"}
+_SERIES_RE = re.compile(r"^[A-Z]-[A-Z]{3}-([A-Z]?)")
+
+
+def record_status(file_id: str) -> str:
+    """``numbered``, ``lost`` or ``doubtful``, read from the identifier of the record."""
+    m = _SERIES_RE.match(file_id or "")
+    return SERIES_STATUS.get(m.group(1) if m else "", "numbered")
+
+
+# Rule v2: the TEI @cert on the edition enters c(r) as a factor k. The values are the degrees of the
+# 4-level layer of GSAS (Gradual Semantic Alignment for SKOS, Research-Squirrel-Engineers/GSAS, commit
+# bdbe0fb, skos_4level/skos_4level_degrees.csv), rounded to four decimals. GSAS names them
+# skosplus:relatedMatchLow / ...Medium / ...High; the TEI values low, medium, high map one to one.
+CERT_FACTOR = {"low": 0.6469, "medium": 0.8517, "high": 0.9690}
+CERT_IRI = {"low": "https://w3id.org/skos-plus/relatedMatchLow",
+            "medium": "https://w3id.org/skos-plus/relatedMatchMedium",
+            "high": "https://w3id.org/skos-plus/relatedMatchHigh"}

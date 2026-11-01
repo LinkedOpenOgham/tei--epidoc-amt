@@ -3,6 +3,27 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] - 2026-11-01
+
+### Added
+- **Rule v2.** The `@cert` of the edition enters c(r) as a factor k: low 0.6469, medium 0.8517, high 0.9690, none
+  1. The values are the degrees of the 4-level layer of GSAS (Research-Squirrel-Engineers/GSAS, commit `bdbe0fb`,
+  `skos_4level/skos_4level_degrees.csv`), rounded to four decimals. New method `ogham:ConfidenceCertAgreementRule`.
+  The graphs of v2 are written to `out/v2/`; rule v1 and `out/*.amt.ttl` stay. Only Gigha 1 changes its weights
+  (the edition 0.1818 to 0.1257); Dyke keeps weight 1.0000, because the weights are shares. *Proposal.*
+- `ogham:recordStatus` on every stone node (`numbered`, `lost`, `doubtful` from the series letter of the
+  identifier), the same term as in `tei--epidoc-crosswalk`. *Proposed term.*
+- Docs: section "Rule v2" on the page Weights, comparison table v1 and v2 on the page Stones.
+- Tests: rule v2 (sum 1, only `@cert` stones change, factor on the edition only, own method), record status.
+- README: data licence (CC BY 4.0 as declared in the EpiDoc headers).
+
+### Changed
+- `@cert` of the edition is shown in the doubt signals of the stone tables.
+
+### Unchanged
+- Rule v1, every weight and type in `out/`. The graphs of `out/` differ from 0.3.0 only by the new terms and by
+  `ogham:recordStatus` on the stone node.
+
 ## [0.3.0] - 2026-11-01
 
 Takes in the three stones of the CAA UK 2026 poster ("Purported, Alleged, Undetermined: Four Degrees of Doubt

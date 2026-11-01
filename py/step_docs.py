@@ -42,6 +42,9 @@ def short(iri) -> str:
     return str(iri).rsplit("/", 1)[-1]
 
 
+OGHAM_NS = "http://ontology.ogham.link/"
+
+
 def load_ontology() -> Graph:
     g = Graph()
     g.parse(ONTOLOGY, format="turtle")
@@ -135,7 +138,7 @@ def vocabulary_page() -> str:
             rows.append(f"| `ogham:{short(s)}` | {label} | {text} | {scope} |")
     for s in sorted(g.subjects(RDF.type, RDF.Property), key=str):
         extra = f" Domain `{short(g.value(s, RDFS.domain))}`, range `{short(g.value(s, RDFS.range))}`."
-        rows.append(f"| `ogham:{short(s)}` | Link | {lit(g, s, SKOS.definition)}{extra} | {lit(g, s, SKOS.scopeNote)} |")
+        rows.append(f"| `ogham:{short(s)}` | {'Link' if g.value(s, RDFS.range) is not None and str(g.value(s, RDFS.range)).startswith(str(OGHAM_NS)) else 'Property'} | {lit(g, s, SKOS.definition)}{extra} | {lit(g, s, SKOS.scopeNote)} |")
     meth = []
     for s in sorted(g.subjects(RDF.type, FW.RuleBasedMethod), key=str):
         meth.append(f"| `ogham:{short(s)}` | Method | {lit(g, s, RDFS.comment)} | Formula: `{lit(g, s, FW.formula)}` |")
@@ -199,7 +202,26 @@ inscription (see Blackwaterfoot 1).
         if k == 0 and len(readings) > 1:
             block += [figure("04_gigha", "The readings of the first stone")]
         out.append("\n".join(block))
+    out.append(rule_comparison())
     return "\n".join(out)
+
+
+def rule_comparison() -> str:
+    """Rule v1 against rule v2 for every reading of a stone whose edition carries @cert."""
+    rows = []
+    for f, base in STONES:
+        stone, v1 = analyse(DATA / f)
+        _, v2 = analyse(DATA / f, "v2")
+        if not any(r.cert for r in v1):
+            continue
+        for a, b in zip(v1, v2):
+            rows.append(f"| {stone.get('title', '')} | {a.editor} | {a.cert or ''} | {a.confidence:.4f} | {b.confidence:.4f} | "
+                        f"{a.weight:.4f} | {b.weight:.4f} |")
+    return ("## Rule v1 and rule v2\n\n"
+            "The stones whose edition carries `@cert`, under both rules (see [Weights](weights.html)). The graphs of v2 are in "
+            "`out/v2/`.\n\n"
+            "| Stone | Editor | `@cert` | c(r) v1 | c(r) v2 | Weight v1 | Weight v2 |\n|---|---|---|---|---|---|---|\n"
+            + "\n".join(rows) + "\n")
 
 
 def run_page(res) -> str:

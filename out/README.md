@@ -42,6 +42,8 @@ The **tradition agreement** `a` = fraction of readings that cluster with r (stri
 amt:weight(r) = c(r)·a(r) / Σ c·a          (Σ over the alternatives = 1)
 ```
 
+**Rule v2** (written to `out/v2/`, next to v1) multiplies c of an edition that carries `@cert` by the GSAS degree of that level: `low` 0.6469, `medium` 0.8517, `high` 0.9690 (4-level layer of [GSAS](https://github.com/Research-Squirrel-Engineers/GSAS)); everything else is as in v1. The tables below are rule v1; the comparison is on the page *Stones* of the documentation.
+
 ## 3. How the FW type is set
 
 The type names the factor that pulled the raw weight below 1. It does not change the weight.
@@ -83,7 +85,7 @@ The graphs contain no axioms. The reasoning engine ([`alpaca-fair-framework/amt-
 |---|---|---|---|---|---|---|
 | VICULA MAQ COMGINI | Macalister 1902 | proxy: 0 editor-marked char(s) of 16 | 1.00 | 0.60 | **0.2727** | U |
 | VICULA MAQ CUGINI | Macalister 1945 | proxy: 0 editor-marked char(s) of 15 | 1.00 | 0.60 | **0.2727** | U |
-| [---]MAQ[---]COGIN[---] | OG(H)AM edition (KF) | 2× `<unclear>`, 0× `<supplied>`, 3× `<gap>` | 0.50 | 0.80 | **0.1818** | FW |
+| [---]MAQ[---]COGIN[---] | OG(H)AM edition (KF) | 2× `<unclear>`, 0× `<supplied>`, 3× `<gap>`, `@cert` low | 0.50 | 0.80 | **0.1818** | FW |
 | MAQICAGILEB | Rhys 1899 | proxy: 0 editor-marked char(s) of 11 | 1.00 | 0.40 | **0.1818** | U |
 | OGMA MAQI TIGERNI | Rhys 1901 | proxy: 0 editor-marked char(s) of 15 | 1.00 | 0.20 | **0.0909** | U |
 
@@ -160,7 +162,7 @@ The graphs contain no axioms. The reasoning engine ([`alpaca-fair-framework/amt-
 
 | reading | editor | extracted doubt | c | a | amt:weight | type |
 |---|---|---|---|---|---|---|
-| [---]RRMOQQDITTOSSS[---] [---]E… | OG(H)AM edition (LH) | 12× `<unclear>`, 0× `<supplied>`, 9× `<gap>` | 0.68 | 1.00 | **1.0000** | V |
+| [---]RRMOQQDITTOSSS[---] [---]E… | OG(H)AM edition (LH) | 12× `<unclear>`, 0× `<supplied>`, 9× `<gap>`, `@cert` low | 0.68 | 1.00 | **1.0000** | V |
 
 *c per reading:*
 

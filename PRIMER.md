@@ -2,7 +2,7 @@
 
 Arbeitsplan für das Repository `LinkedOpenOgham/tei--epidoc-amt`. Wird zu Beginn jedes Chats hochgeladen und am Ende zurückgeschrieben. Alles Nach-außen-Sichtbare (Code, README, Ontologie, Docs) ist britisches Englisch, dieses Dokument ist deutsch.
 
-Stand: 2026-11-01, Release 0.3.0.
+Stand: 2026-11-01, Release 0.4.0.
 
 ---
 
@@ -12,7 +12,8 @@ Stand: 2026-11-01, Release 0.3.0.
 
 | Repo | Rolle | Stand |
 |---|---|---|
-| `LinkedOpenOgham/tei--epidoc-amt` | dieses Repo: OG(H)AM-EpiDoc, sieben Steine, AMT-Graphen | 0.3.0 |
+| `LinkedOpenOgham/tei--epidoc-amt` | dieses Repo: OG(H)AM-EpiDoc, sieben Steine, AMT-Graphen | 0.4.0 |
+| `Research-Squirrel-Engineers/GSAS` | Gradual Semantic Alignment for SKOS: Grade für low/medium/high (4-Level) | nur gelesen (Commit `bdbe0fb`) |
 | `LinkedOpenOgham/tei--epidoc-crosswalk` | Achse 1 (CIDOC CRM), gleiche sieben Basisnamen, `ogham:recordStatus` und Zweifelsprofil am Stein | 0.2.2, nicht angefasst |
 | `alpaca-fair-framework/amt-engine` (früher `n4o-rse/`) | AMT.engine, hier gegen 0.6.0 modelliert | nicht angefasst |
 | `alpaca-fair-framework/amt-runner` (früher `n4o-rse/`) | Wrapper, klont die Engine, `--check-only` | 0.5.0, nicht angefasst |
@@ -79,7 +80,12 @@ Eigenschaften, die das Ergebnis haben muss:
 | Stein ohne CIIC | IRIs und Beschriftung nach Dateiname (`stone_S_MOR_001`); leeres `<idno type="CIIC"/>` zählt nicht als Nummer | Vorschlag 2026-11-01 |
 | `<rdg>` ohne `@source` | kein `prov:wasAttributedTo`, kein gemeinsamer Agent; Anzeige "no editor named". Der Name steht nur in der Prosa der `<note>` und wird nicht geparst. | Vorschlag 2026-11-01 |
 | Rolle `hasReading` | ohne formale `rdfs:domain` (Subjekt ist Stein oder Inschrift); Hinweis in Definition und Scope Note | Vorschlag 2026-11-01 |
-| `@cert` an der Edition | wird von Regel v1 nicht gelesen (Gigha 1, Dyke: `cert="low"`); in Docs als Grenze genannt | 2026-11-01 |
+| `@cert` an der Edition | Regel v1 liest es nicht (bleibt, Grenze in den Docs). **Regel v2** (Beschluss Flo 2026-11-01): c' = c · k(cert), k aus GSAS 4-Level (low 0,6469 / medium 0,8517 / high 0,9690, ohne cert 1). Methode `ogham:ConfidenceCertAgreementRule`. v2 zusätzlich in `out/v2/`, v1 bleibt in `out/`. Zuordnung TEI-Stufe = GSAS-Stufe und Produkt sind Vorschläge. | 2026-11-01 |
+| `ogham:recordStatus` im AMT-Graphen | am Stein-Knoten, wie im Crosswalk (numbered/lost/doubtful aus dem Bezeichner); ändert kein Gewicht | 2026-11-01 (Flo) |
+| Typzuordnung (D2) | c<1 Vagueness, a<1 Uncertainty bleibt; Bishop Loch behält Vagueness (Objekt-Zweifel ist die dokumentierte Grenze, kein Typ) | 2026-11-01 (Flo) |
+| `<rdg>` ohne `@source` (D8) | bleibt ohne Agent; Rückmeldung ans OG(H)AM-Team (`@source` ergänzen) | 2026-11-01 (Flo) |
+| Datenlizenz (D3) | CC BY 4.0, so in `<licence>` jedes EpiDoc-Headers erklärt; README nennt es | 2026-11-01 |
+| Tags | v0.1.0 = `51072be`, v0.2.0 = `86705fc`, v0.2.1 = `ae78c69`, v0.3.0 = `dd11430`, v0.4.0 = der Commit dieses Patches | 2026-11-01 (Flo) |
 | Docs | Jekyll in `docs/`, Farben #004c55 / #0090a2 und Logo aus `LinkedOpenOgham/logo` | 2026-10-30 |
 | Release-Nummer | 0.3.0 (0.2.0 und 0.2.1 am 2026-10-30; 0.1.0 für den Stand davor rückwirkend benannt) | Vorschlag 2026-10-30 |
 | Engine-Check | eigener Schritt `check`, nie im Standardlauf | 2026-10-30 |
@@ -109,6 +115,7 @@ Nicht hochladen: `.venv/`, `.git/`, `build/`, die Abbildungen in `docs/diagrams/
 | S6 | Methode in die FW-Ontologie | FW_Ontology | S1 | offen |
 | S7 | Release, Zenodo, Pages | tei--epidoc-amt | S2 | offen |
 | S8 | Drei Steine aufnehmen (Dyke, Blackwaterfoot 1, Bishop Loch), je Inschrift lesen | tei--epidoc-amt | | erledigt 2026-11-01 |
+| S9 | Regel v2 (`@cert` mit GSAS-Graden), `recordStatus`, Tags | tei--epidoc-amt | S8 | erledigt 2026-11-01 |
 
 S8 ist aus der Übergabe S10 des Crosswalk-PRIMER entstanden. S4, S5 und S6 sind voneinander unabhängig und können in beliebiger Reihenfolge laufen, auch vor S2. S3 und S7 warten auf das Ergebnis von S2.
 
@@ -201,16 +208,28 @@ Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt
 - **Bishop Loch ist die Grenze der Methode:** Gewicht 1,0000 und Typ Vagueness sagen nichts über die Zweifel am Objekt, die nur in der Prosa stehen. Steht auf der Seite Stones und Weights.
 - **Nicht ausgeführt:** Engine-/Runner-Check (S2), jetzt für sieben Graphen.
 
+## S9 — Regel v2, recordStatus, Tags
+
+**Ziel:** `@cert` der Edition geht über GSAS-Grade in c(r) ein, ohne v1 zu verändern; der Status des Records steht im AMT-Graphen.
+
+**Abnahme:** `out/` (v1) unverändert bis auf `ogham:recordStatus` und die neuen Ontologie-Terme; `out/v2/` mit eigener Methode; Gewichte je Stein bzw. Inschrift 1; Tests grün; zwei Läufe identisch.
+
+### Erledigt 2026-11-01
+
+- Gigha 1 unter v2: Edition 0,1818 → 0,1257 (c 0,50 → 0,3235), Macalister 1902/1945 je 0,2727 → 0,2914, Rhys 1899 0,1818 → 0,1943, Rhys 1901 0,0909 → 0,0971. Dyke: c 0,6809 → 0,4405, Gewicht bleibt 1,0000 (Anteil-Modell, A4): v2 ändert nur Steine mit konkurrierenden Lesungen.
+- 14 Tests grün (fünf neu).
+- Tags setzt Flo selbst (siehe A4).
+
 # Teil D: Offene Punkte
 
 - **D1 erledigt** (2026-10-30, siehe A4 und S4). Für die Paper: die Grenze des Anteil-Modells offen ansprechen.
-- **D2 Zuordnung der Faktoren zu den Typen.** Ist "markierte Zeichen" wirklich Vagueness und "Dissens der Editoren" wirklich Uncertainty? Das ist eine inhaltliche Entscheidung, die gegengeprüft werden sollte (FW-Ontologie, Samian-Beispiel).
-- **D3 Datenlizenz** der EpiDoc-Eingaben (OG(H)AM-Projekt) und Lizenz des Logos fehlen. Die Docs binden das Logo ein.
+- **D2 entschieden** (2026-11-01, A4). Früher: Zuordnung der Faktoren zu den Typen. Ist "markierte Zeichen" wirklich Vagueness und "Dissens der Editoren" wirklich Uncertainty? Das ist eine inhaltliche Entscheidung, die gegengeprüft werden sollte (FW-Ontologie, Samian-Beispiel).
+- **D3 Datenlizenz erledigt** (CC BY 4.0, siehe A4); offen bleibt die Lizenz des Logos. Früher: Datenlizenz der EpiDoc-Eingaben (OG(H)AM-Projekt) und Lizenz des Logos fehlen. Die Docs binden das Logo ein.
 - **D4 erledigt** (2026-11-01): ORCID und Affiliation in `CITATION.cff`.
 - **D5 Papiere.** ArcheoFOSS (Jahr bitte bestätigen, im Chat stand 2025) und UK CAA: Welche Abbildungen kommen hinein (Vorschlag: `02_hextuple`, `04_gigha`, `05_spectrum`), und wird die Grenze des Anteil-Modells (D1) dort diskutiert? Vorschlag: ja, in einem Satz.
-- **D7 `ogham:recordStatus` im AMT-Graphen?** Der Crosswalk exportiert X/L-Status und Zweifelsprofil am Stein; hier fehlt beides. Für das Poster könnte eine Abfrage über beide Repos reichen. Falls nicht: Status aus dem Bezeichner in `ogham-amt.ttl` aufnehmen (gleicher Begriff, gleicher Vorschlag-Status).
-- **D8 Quelle der `<rdg>` ohne `@source`.** Vier Lesungen bei Blackwaterfoot 1 nennen den Bearbeiter nur in der Prosa (Jackson 1973, Forsyth 1996). Entweder die Daten ergänzen (`@source` im OG(H)AM-Repo, Rückmeldung an das OG(H)AM-Team, `lguariento/og-h-am`) oder bewusst ohne Agent lassen.
-- **D9 `@cert` an der Edition.** Gigha 1 und Dyke tragen `cert="low"`; Regel v1 liest es nicht. Soll `cert` in c(r) eingehen (Regel v2, eigenes Methoden-Individuum)? Verwandt mit D2 und mit der Grenze bei Bishop Loch.
+- **D7 erledigt** (S9). Früher: `ogham:recordStatus` im AMT-Graphen? Der Crosswalk exportiert X/L-Status und Zweifelsprofil am Stein; hier fehlt beides. Für das Poster könnte eine Abfrage über beide Repos reichen. Falls nicht: Status aus dem Bezeichner in `ogham-amt.ttl` aufnehmen (gleicher Begriff, gleicher Vorschlag-Status).
+- **D8 entschieden** (ohne Agent, siehe A4; offen bleibt nur die Rückmeldung ans OG(H)AM-Team). Quelle der `<rdg>` ohne `@source`. Vier Lesungen bei Blackwaterfoot 1 nennen den Bearbeiter nur in der Prosa (Jackson 1973, Forsyth 1996). Entweder die Daten ergänzen (`@source` im OG(H)AM-Repo, Rückmeldung an das OG(H)AM-Team, `lguariento/og-h-am`) oder bewusst ohne Agent lassen.
+- **D9 erledigt** (S9, Regel v2). Früher: `@cert` an der Edition. Gigha 1 und Dyke tragen `cert="low"`; Regel v1 liest es nicht. Soll `cert` in c(r) eingehen (Regel v2, eigenes Methoden-Individuum)? Verwandt mit D2 und mit der Grenze bei Bishop Loch.
 - **D10 `hasReading` ohne Domain.** Der Engine-Check (S2) zeigt, ob Runner/Engine das akzeptieren. Falls nicht: Union-Klasse oder zweite Rolle für Inschriften.
 - **D11 Abbildungen und Matplotlib.** Die eingecheckten Bilder stammen aus Matplotlib 3.9.2 (`requirements.txt` nennt 3.11, das ist falsch); Clip-IDs ändern sich je Plattform. Nur Bilder committen, deren Inhalt sich geändert hat (`05_spectrum`).
-- **D6 Rückwirkende Release-Nummer.** Gab es für den Stand vor dieser Arbeit einen Tag 0.1.0? Falls nein, CHANGELOG-Eintrag anpassen.
+- **D6 erledigt** (Tags 2026-11-01, A4). Früher: Rückwirkende Release-Nummer. Gab es für den Stand vor dieser Arbeit einen Tag 0.1.0? Falls nein, CHANGELOG-Eintrag anpassen.

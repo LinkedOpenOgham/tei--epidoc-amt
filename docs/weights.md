@@ -45,6 +45,27 @@ Two more things the weight does not say, both visible in the stones of release 0
   with two `<gap>` elements, so its weight is 1.0000 and its type `fw:Vagueness`. Whether the object is an
   ogham inscription at all is said only in prose in the record (see [Stones](stones.html)); no element
   carries it, so no weight can.
-- **It does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
+- **Rule v1 does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
   on its `<div>`. Rule v1 counts `unclear`, `supplied` and `gap` and ignores the attribute, so the
-  doubt the editors put on the whole edition is not in c(r).
+  doubt the editors put on the whole edition is not in c(r). Rule v2 reads it (next section).
+
+## Rule v2: the certainty of the edition
+
+Rule v2 is rule v1 with one more factor: the `@cert` of the edition multiplies c(r) by k. The values of k are
+the degrees of the 4-level layer of [GSAS](https://github.com/Research-Squirrel-Engineers/GSAS) (Gradual
+Semantic Alignment for SKOS, commit `bdbe0fb`, `skos_4level/skos_4level_degrees.csv`), rounded to four
+decimals, and the TEI levels map to them one to one:
+
+| `@cert` | GSAS level | k |
+|---|---|---|
+| `low` | `skosplus:relatedMatchLow` | 0.6469 |
+| `medium` | `skosplus:relatedMatchMedium` | 0.8517 |
+| `high` | `skosplus:relatedMatchHigh` | 0.9690 |
+| none | | 1 |
+
+The apparatus readings have no `@cert`, so k = 1 for them. v2 is written next to v1, not instead of it:
+`out/*.amt.ttl` is v1 (`ogham:ConfidenceAgreementRule`), `out/v2/*.amt.ttl` is v2
+(`ogham:ConfidenceCertAgreementRule`). The mapping of the TEI levels to the GSAS levels, and the use of a
+product, are proposals to be reviewed. A stone with one reading keeps weight 1 under v2 as well, because the
+weights are shares: v2 changes only the weights of a stone whose readings compete. Of the seven stones, that is
+Gigha 1 (the edition carries `cert="low"`); the comparison is on the page [Stones](stones.html).

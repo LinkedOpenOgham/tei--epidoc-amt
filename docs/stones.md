@@ -22,7 +22,7 @@ Graph: [`out/gigha1.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt
 |---|---|---|---|---|---|---|
 | Macalister 1902 | `VICULA MAQ COMGINI` | proxy: 0 editor-marked char(s) of 16 | 1 − 0 / 16 = **1.00** | 0.60 | **0.2727** | fw:Uncertainty |
 | Macalister 1945 | `VICULA MAQ CUGINI` | proxy: 0 editor-marked char(s) of 15 | 1 − 0 / 15 = **1.00** | 0.60 | **0.2727** | fw:Uncertainty |
-| OG(H)AM edition (KF) | `[---]MAQ[---]COGIN[---]` | 2× `<unclear>`, 0× `<supplied>`, 3× `<gap>` | 1 − (0.5·2 + 0.7·0 + 1.0·3) / 8 = **0.50** | 0.80 | **0.1818** | fw:FuzzinessWobbliness |
+| OG(H)AM edition (KF) | `[---]MAQ[---]COGIN[---]` | 2× `<unclear>`, 0× `<supplied>`, 3× `<gap>`, `@cert` low | 1 − (0.5·2 + 0.7·0 + 1.0·3) / 8 = **0.50** | 0.80 | **0.1818** | fw:FuzzinessWobbliness |
 | Rhys 1899 | `MAQICAGILEB` | proxy: 0 editor-marked char(s) of 11 | 1 − 0 / 11 = **1.00** | 0.40 | **0.1818** | fw:Uncertainty |
 | Rhys 1901 | `OGMA MAQI TIGERNI` | proxy: 0 editor-marked char(s) of 15 | 1 − 0 / 15 = **1.00** | 0.20 | **0.0909** | fw:Uncertainty |
 
@@ -61,11 +61,12 @@ Graph: [`out/dyke.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epidoc-amt/b
 
 The record has no CIIC number; its file name `S-MOR-001` names it. The note in the apparatus speaks
 of three inscriptions, but the file holds one transliteration of three lines, which is one reading here.
-The edition carries `cert="low"` on its `<div>`, which the weight does not read (see [Weights](weights.html)).
+The edition carries `cert="low"` on its `<div>`: rule v1 does not read it, rule v2 does (see [Weights](weights.html)); the
+weight stays 1.0000 under both, because there is no other reading to share it with.
 
 | Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
 |---|---|---|---|---|---|---|
-| OG(H)AM edition (LH) | `[---]RRMOQQDITTOSSS[---] [---]EDDARRNON V[---]THIHAL[---]IRR[---]UIBUZ[---] SONSELCCO[---]` | 12× `<unclear>`, 0× `<supplied>`, 9× `<gap>` | 1 − (0.5·12 + 0.7·0 + 1.0·9) / 47 = **0.68** | 1.00 | **1.0000** | fw:Vagueness |
+| OG(H)AM edition (LH) | `[---]RRMOQQDITTOSSS[---] [---]EDDARRNON V[---]THIHAL[---]IRR[---]UIBUZ[---] SONSELCCO[---]` | 12× `<unclear>`, 0× `<supplied>`, 9× `<gap>`, `@cert` low | 1 − (0.5·12 + 0.7·0 + 1.0·9) / 47 = **0.68** | 1.00 | **1.0000** | fw:Vagueness |
 
 ## Blackwaterfoot 1 (S-BUT-001)
 
@@ -105,7 +106,7 @@ Graph: [`out/bishop-loch.amt.ttl`](https://github.com/LinkedOpenOgham/tei--epido
 
 The record has no CIIC number; its identifier carries the series letter X, which the sister
 repository [tei--epidoc-crosswalk](https://github.com/LinkedOpenOgham/tei--epidoc-crosswalk) exports as
-`ogham:recordStatus "doubtful"`. The record calls the markings "purported" and
+`ogham:recordStatus "doubtful"`; so does this graph. The record calls the markings "purported" and
 "alleged" and the object a stick "bearing ogham-like markings", in prose only. The only
 markup in the edition is two `<gap>` elements. That is the **limit of the method**: the single reading has
 weight 1.0000 and type `fw:Vagueness` (c = 0.60 from the gaps), and neither says that the object may not
@@ -114,3 +115,16 @@ carry an ogham inscription. The doubt about the object is not in the markup, so 
 | Editor | Reading | Doubt signals | c(r) | a(r) | Weight | Type |
 |---|---|---|---|---|---|---|
 | OG(H)AM edition (NW) | `AT[---]H[---] AL` | 0× `<unclear>`, 0× `<supplied>`, 2× `<gap>` | 1 − (0.5·0 + 0.7·0 + 1.0·2) / 5 = **0.60** | 1.00 | **1.0000** | fw:Vagueness |
+
+## Rule v1 and rule v2
+
+The stones whose edition carries `@cert`, under both rules (see [Weights](weights.html)). The graphs of v2 are in `out/v2/`.
+
+| Stone | Editor | `@cert` | c(r) v1 | c(r) v2 | Weight v1 | Weight v2 |
+|---|---|---|---|---|---|---|
+| Gigha 1 | OG(H)AM edition (KF) | low | 0.5000 | 0.3235 | 0.1818 | 0.1257 |
+| Gigha 1 | Rhys 1899 |  | 1.0000 | 1.0000 | 0.1818 | 0.1943 |
+| Gigha 1 | Rhys 1901 |  | 1.0000 | 1.0000 | 0.0909 | 0.0971 |
+| Gigha 1 | Macalister 1902 |  | 1.0000 | 1.0000 | 0.2727 | 0.2914 |
+| Gigha 1 | Macalister 1945 |  | 1.0000 | 1.0000 | 0.2727 | 0.2914 |
+| Dyke | OG(H)AM edition (LH) | low | 0.6809 | 0.4405 | 1.0000 | 1.0000 |
