@@ -16,8 +16,8 @@ Graph"*.
 
 For each stone it collects the competing readings and emits an AMT graph:
 
-- `amt:Concept` — the classes `OghamStone`, `Reading` and (only for a record with several inscriptions) `Inscription`
-- `amt:Role` — the relation `hasReading`
+- `amt:Concept` — the classes `OghamStone`, `Reading`, `Editor` and (only for a record with several inscriptions) `Inscription`
+- `amt:Role` — the relation `hasReading` (and its kinds, `attributedTo`, `readByEditor`)
 - individuals — the stone and each reading, linked with `amt:instanceOf`
 - weighted edges — one reified quadruple (`rdf:subject` / `rdf:predicate` /
   `rdf:object` + `amt:weight`) per reading
@@ -27,6 +27,10 @@ For each stone it collects the competing readings and emits an AMT graph:
   and the **evidence** it was derived from (`fw:derivedFrom`), as in
   AMT.engine 0.6.0
 
+- axioms (since 0.5.0) — five, in `ontology/ogham-amt.ttl`: the sub-roles `hasEditionReading` and
+  `hasHistoricalReading` of `hasReading`, and the chain `hasReading` then `attributedTo` gives
+  `readByEditor` (product logic); the AMT engine derives the weight each editor carries for a stone
+  (`python main.py --only reason`)
 - record status (since 0.4.0) — `ogham:recordStatus` on the stone: `numbered`,
   `lost` or `doubtful`, read from the series letter of the identifier, as in the crosswalk
 - two rules (since 0.4.0) — `out/*.amt.ttl` follows rule v1; `out/v2/*.amt.ttl`
@@ -65,7 +69,7 @@ attributed to anyone.
 tei--epidoc-amt/
 ├── data/                      # inputs (EpiDoc XML), unchanged
 ├── ontology/
-│   └── ogham-amt.ttl          # the domain model: 3 concepts, 1 role, 1 link, 1 method
+│   └── ogham-amt.ttl          # the domain model: 4 concepts, 7 roles, 1 link, 2 methods, 5 axioms
 ├── out/                       # generated outputs
 │   ├── README.md              # extraction, scores, c, AMT modelling (generated)
 │   ├── *.amt.ttl              # one AMT graph per stone, rule v1 (generated)
@@ -116,12 +120,14 @@ build has no clock in it: a second run changes no file.
 python main.py --list
 python main.py --only convert
 python main.py --only check
+python main.py --only reason
 ```
 
-`--only check` is the one step that needs the network. It fetches the
+`--only check` and `--only reason` are the steps that need the network. They fetch the
 [amt-runner](https://github.com/alpaca-fair-framework/amt-runner), which in turn
-fetches the AMT engine, and runs `--check-only` on every graph: validation
-against the AMT shapes, loading, diagnostics. Nothing is written outside `build/`.
+fetches the AMT engine. `check` runs `--check-only` on every graph of `out/` and `out/v2/`:
+validation against the AMT shapes, loading, diagnostics. `reason` lets the engine reason over the
+graphs and lists the edges it derives (`build/reason-report.txt`). Nothing is written outside `build/`.
 
 The earlier entry point still works:
 

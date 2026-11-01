@@ -22,10 +22,17 @@ IDEA = """1. **One statement per reading.** The stone is linked to each reading 
    by uncertainty or by both, using the three types of the
    [Fuzziness-Wobbliness ontology](https://github.com/alpaca-fair-framework/FW_Ontology)."""
 
-MODEL_NOTE = """The model has three concepts (stone, inscription, reading), one role (`hasReading`) and one
-plain link (`hasInscription`, written only for records with several inscriptions). Nothing is inferred from it: the graphs hold weighted
-statements only, no axioms. That is a deliberate choice for this release; the page [Run](run.html) says
-what it means for the engine."""
+MODEL_NOTE = """The model has four concepts (stone, inscription, reading, editor), seven roles and one plain link
+(`hasInscription`, written only for records with several inscriptions). Five axioms say what the engine can
+derive from the weighted statements: an edition reading and a historical reading are readings (subsumption), and
+a stone, or its inscription, is read by the editor of its reading (role chain, with product logic). The page
+[Run](run.html) says what the engine then does."""
+
+AXIOM_INTRO = """The axioms are written in `ontology/ogham-amt.ttl` and copied into every graph, so that the AMT
+engine finds them next to the data. They are proposals, to be reviewed (PRIMER S3). The graphs assert the finer
+statement (`hasEditionReading` or `hasHistoricalReading`) with the same weight next to the `hasReading`
+statement, so that a consumer without the role hierarchy still finds every `hasReading` edge. `readByEditor` is never
+asserted: it appears only when the engine reasons."""
 
 HEXTUPLE_INTRO = """AMT stores a weighted statement as a reified triple plus the weight. Release {release} adds the
 three annotations of the hextuple of AMT.engine 0.6.0: the type of the doubt, the method that produced the
@@ -62,9 +69,19 @@ It clones the [amt-runner]({runner}) into `build/` (ignored by git), then calls
 AMT shapes, loads the graph and runs the diagnostics (`AMT-E101`, `AMT-E102`, `AMT-E103`, `AMT-N301`), and
 writes no output. The report is `build/check-report.txt`."""
 
-RUN_REASONING = """The graphs contain **no axioms** (no role chains, inverses or subsumptions). A full run of the runner
-therefore validates and exports, but infers nothing. Axioms are a modelling decision, not a technicality. The
-proposals are in the PRIMER, steps S3 to S5."""
+RUN_REASONING = """The graphs contain five axioms (two subsumptions, two role chains, one disjointness). A full run of the
+engine therefore derives `readByEditor` (or `inscriptionReadByEditor`): how much weight the readings of one editor
+carry for the stone. For Gigha 1 it derives five edges: Macalister 1902 and 1945 0.2727 each, the OG(H)AM
+edition (KF) and Rhys 1899 0.1818 each, Rhys 1901 0.0909; each is the weight of the reading of that editor. An
+editor with two readings of one inscription keeps the larger weight (Forsyth 1996 on the second inscription of
+Blackwaterfoot 1: 0.3913). The subsumptions derive nothing new, because the `hasReading` edges are asserted too;
+they document the hierarchy for the engine. The disjointness axiom is checked by the engine's consistency check.
+
+```
+python main.py --only reason
+```
+
+writes the reasoned graphs and reports into `build/reasoned/` (network; not part of the default build)."""
 
 SHARE_NOTE = """## What the weight does not say
 

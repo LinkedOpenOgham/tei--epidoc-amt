@@ -54,7 +54,7 @@ class TypeTests(unittest.TestCase):
 class HextupleTests(unittest.TestCase):
     def test_every_statement_is_complete(self):
         for base, _, readings, g in graphs():
-            stmts = list(g.subjects(AMT.weight, None))
+            stmts = list(g.subjects(FW.derivedFrom, None))   # the hextuples; the finer-role and attribution quadruples have none
             self.assertEqual(len(stmts), len(readings), base)
             for s in stmts:
                 self.assertNotIsInstance(s, BNode, base)
@@ -73,7 +73,7 @@ class InscriptionTests(unittest.TestCase):
         by = {base: (readings, g) for base, _, readings, g in graphs()}
         readings, g = by["blackwaterfoot-1"]
         self.assertEqual([n for n, _ in units(readings)], [1, 2])
-        subjects = set(g.objects(None, RDF.subject))
+        subjects = {g.value(st, RDF.subject) for st in g.subjects(FW.derivedFrom, None)}
         self.assertEqual(len(subjects), 2)
         self.assertEqual(len(list(g.subject_objects(OGHAM.hasInscription))), 2)
 
@@ -128,6 +128,46 @@ class StatusTests(unittest.TestCase):
             self.assertEqual(status, {record_status(stone["filename"])}, base)
         self.assertIn("doubtful", {str(o) for base, _, _, g in graphs() if base == "bishop-loch"
                                    for o in g.objects(None, OGHAM.recordStatus)})
+
+
+class AxiomTests(unittest.TestCase):
+    def test_finer_role_statement_has_the_weight_of_the_reading(self):
+        for base, _, readings, g in graphs():
+            kinds = [s for s in g.subjects(RDF.predicate, None)
+                     if g.value(s, RDF.predicate) in (OGHAM.hasEditionReading, OGHAM.hasHistoricalReading)]
+            for k in kinds:
+                same = [h for h in g.subjects(RDF.object, g.value(k, RDF.object))
+                        if g.value(h, RDF.predicate) == OGHAM.hasReading]
+                self.assertEqual(len(same), 1, base)
+                self.assertEqual(g.value(k, AMT.weight), g.value(same[0], AMT.weight), base)
+            expected = sum(1 for r in readings if r.inscription is None)
+            self.assertEqual(len(kinds), expected, base)
+
+    def test_attributions_have_weight_one_and_only_for_named_sources(self):
+        for base, _, readings, g in graphs():
+            atts = [s for s in g.subjects(RDF.predicate, OGHAM.attributedTo)]
+            self.assertEqual(len(atts), sum(1 for r in readings if r.source_id), base)
+            for a in atts:
+                self.assertEqual(str(g.value(a, AMT.weight)), "1.0000", base)
+
+    def test_inscriptions_use_their_own_role(self):
+        for base, _, readings, g in graphs():
+            preds = {g.value(s, RDF.predicate) for s in g.subjects(FW.derivedFrom, None)}
+            if base == "blackwaterfoot-1":
+                self.assertEqual(preds, {OGHAM.hasInscriptionReading}, base)
+            else:
+                self.assertEqual(preds, {OGHAM.hasReading}, base)
+
+    def test_axioms_are_in_every_graph_without_blank_nodes(self):
+        for base, _, _, g in graphs():
+            self.assertEqual(len(list(g.subjects(RDF.type, AMT.SubsumptionAxiom))), 2, base)
+            self.assertEqual(len(list(g.subjects(RDF.type, AMT.RoleChainAxiom))), 2, base)
+            self.assertEqual(len(list(g.subjects(RDF.type, AMT.DisjointAxiom))), 1, base)
+
+    def test_every_role_has_exactly_one_domain(self):
+        _, _, _, g = next(graphs())
+        for role in g.subjects(RDF.type, AMT.Role):
+            self.assertEqual(len(list(g.objects(role, RDFS.domain))), 1, role)
 
 
 class NamingTests(unittest.TestCase):

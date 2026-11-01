@@ -5,6 +5,7 @@
     python main.py --list          show the steps
     python main.py --only docs     run one step (or several: --only convert docs)
     python main.py --only check    validate with the AMT runner (needs network; never in the default run)
+    python main.py --only reason   let the AMT engine reason and list what it derives (needs network; on request)
 
 The steps are the modules py/step_*.py; each has a run() that returns 0 on success.
 """
@@ -18,10 +19,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "py"))
 
 STEPS = [  # (name, module, in the default run, what it does)
     ("convert",  "step_convert",  True,  "EpiDoc -> out/*.amt.ttl and out/README.md"),
-    ("diagrams", "step_diagrams", True,  "five figures into docs/diagrams/"),
+    ("diagrams", "step_diagrams", True,  "six figures into docs/diagrams/"),
     ("docs",     "step_docs",     True,  "GitHub Pages documentation into docs/"),
     ("tests",    "step_tests",    True,  "unit tests of the converter"),
     ("check",    "step_check",    False, "AMT runner --check-only on every graph (network)"),
+    ("reason",   "step_reason",   False, "AMT engine reasoning on every graph, report of derived edges (network)"),
 ]
 
 

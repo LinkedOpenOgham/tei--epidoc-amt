@@ -14,9 +14,10 @@
 # out/*.amt.ttl, so that each output file is self-contained for the AMT runner;
 # py/step_docs.py reads the definitions below to write docs/model.html.
 #
-# Three concepts, one role, one plain link, one method. There are no axioms: the
-# graphs carry weighted statements only (see the page "Run" for what that means
-# for the engine).
+# Four concepts, seven roles, one plain link, one method, and five axioms (two
+# subsumptions, two role chains, one disjointness; none of them written as an RDF
+# list, so the graphs stay free of blank nodes). The axioms are what the AMT
+# engine can reason with (see the page "Run").
 # =============================================================================
 
 # ── Concepts ────────────────────────────────────────────────────────────────
@@ -24,6 +25,11 @@
 ogham:OghamStone a amt:Concept ;
     rdfs:label "Ogham stone" ;
     rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .
+
+ogham:Editor a amt:Concept ;
+    rdfs:label "Editor" ;
+    rdfs:comment "A person or edition team that read the inscription the way a reading says: Rhys 1899, Macalister 1945, the OG(H)AM edition (KF). Known from the source id of the reading; a reading without a source has none." ;
+    skos:scopeNote "Not the author of the weight: the weight is computed by the rule, not given by the editor." .
 
 ogham:Inscription a amt:Concept ;
     rdfs:label "Inscription" ;
@@ -38,9 +44,52 @@ ogham:Reading a amt:Concept ;
 
 ogham:hasReading a amt:Role ;
     rdfs:label "has reading" ;
+    rdfs:domain ogham:OghamStone ;
     rdfs:range ogham:Reading ;
-    skos:definition "The stone, or its inscription where the record has several, is read this way by an editor. Each statement carries the weight of that reading among the readings of the same stone or inscription." ;
-    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. The subject is an ogham:OghamStone, or an ogham:Inscription in a record with several inscriptions; a formal domain is left out for that reason." .
+    skos:definition "The stone is read this way by an editor. Each statement carries the weight of that reading among the readings of the stone." ;
+    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. In a record with several inscriptions the subject is the inscription and the role is ogham:hasInscriptionReading." .
+
+ogham:hasEditionReading a amt:Role ;
+    rdfs:label "has edition reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way in the current edition of the OG(H)AM team. A kind of hasReading (axiom ogham:AX_editionIsReading)." ;
+    skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
+
+ogham:hasHistoricalReading a amt:Role ;
+    rdfs:label "has historical reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way by an earlier editor, as the apparatus records it. A kind of hasReading (axiom ogham:AX_historicalIsReading)." ;
+    skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
+
+ogham:hasInscriptionReading a amt:Role ;
+    rdfs:label "has inscription reading" ;
+    rdfs:domain ogham:Inscription ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The inscription is read this way. Used instead of hasReading where a record has several inscriptions; the weight is the share of the reading among the readings of that inscription." ;
+    skos:scopeNote "Same weight rule as hasReading. No sub-roles: the inscriptions of Blackwaterfoot 1 carry the axioms only through the editor chain." .
+
+ogham:attributedTo a amt:Role ;
+    rdfs:label "attributed to" ;
+    rdfs:domain ogham:Reading ;
+    rdfs:range ogham:Editor ;
+    skos:definition "The reading is the editor's reading. Written with weight 1 for every reading whose source the file names." ;
+    skos:scopeNote "The weight 1 says that the attribution is as the file gives it, not that the reading is correct. It is the second link of the editor chains. The same fact is also written as prov:wasAttributedTo." .
+
+ogham:readByEditor a amt:Role ;
+    rdfs:label "read by editor" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Editor ;
+    skos:definition "The weight the readings of the editor carry for the stone: derived by axiom ogham:AX_readByEditor from hasReading and attributedTo." ;
+    skos:scopeNote "Never asserted in the graphs; it appears only when the engine reasons. If one editor has several readings of a stone, the engine keeps the largest weight." .
+
+ogham:inscriptionReadByEditor a amt:Role ;
+    rdfs:label "inscription read by editor" ;
+    rdfs:domain ogham:Inscription ;
+    rdfs:range ogham:Editor ;
+    skos:definition "Like readByEditor, for an inscription: derived by axiom ogham:AX_inscriptionReadByEditor from hasInscriptionReading and attributedTo." ;
+    skos:scopeNote "Never asserted in the graphs." .
 
 # A plain link, not a weighted statement: it says which inscription belongs to which monument.
 ogham:hasInscription a rdf:Property ;
@@ -81,3 +130,34 @@ ogham:ConfidenceCertAgreementRule a fw:RuleBasedMethod ;
     rdfs:comment "Rule v1 with the certainty of the edition as a further factor: weight of a reading among the readings of one stone (or inscription) is c(r) times k(cert) times a(r), divided by the sum of these products. k is the GSAS degree of the level given by the @cert of the edition (low 0.6469, medium 0.8517, high 0.9690), and 1 for an edition without @cert and for every apparatus reading. Four decimals."@en ;
     fw:formula "c(r) * k(cert) * a(r) / sum(c * k * a)" ;
     fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> .
+
+# ── Axioms ──────────────────────────────────────────────────────────────────
+# What the engine can derive. Subsumption: an edition reading and a historical reading are readings.
+# Role chains (legacy two-step form, so that no RDF list and no blank node is needed): the stone, or
+# its inscription, is read by the editor of its reading. Product logic: the attribution has weight 1,
+# so the derived weight equals the weight of the reading. Disjointness: no reading is both.
+# Proposals, to be reviewed (PRIMER S3).
+
+ogham:AX_editionIsReading a amt:SubsumptionAxiom ;
+    amt:subRole ogham:hasEditionReading ;
+    amt:superRole ogham:hasReading .
+
+ogham:AX_historicalIsReading a amt:SubsumptionAxiom ;
+    amt:subRole ogham:hasHistoricalReading ;
+    amt:superRole ogham:hasReading .
+
+ogham:AX_readByEditor a amt:RoleChainAxiom ;
+    amt:antecedent1 ogham:hasReading ;
+    amt:antecedent2 ogham:attributedTo ;
+    amt:consequent ogham:readByEditor ;
+    amt:logic amt:ProductLogic .
+
+ogham:AX_inscriptionReadByEditor a amt:RoleChainAxiom ;
+    amt:antecedent1 ogham:hasInscriptionReading ;
+    amt:antecedent2 ogham:attributedTo ;
+    amt:consequent ogham:inscriptionReadByEditor ;
+    amt:logic amt:ProductLogic .
+
+ogham:AX_editionOrHistorical a amt:DisjointAxiom ;
+    amt:role1 ogham:hasEditionReading ;
+    amt:role2 ogham:hasHistoricalReading .

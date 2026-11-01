@@ -2,7 +2,7 @@
 
 Arbeitsplan für das Repository `LinkedOpenOgham/tei--epidoc-amt`. Wird zu Beginn jedes Chats hochgeladen und am Ende zurückgeschrieben. Alles Nach-außen-Sichtbare (Code, README, Ontologie, Docs) ist britisches Englisch, dieses Dokument ist deutsch.
 
-Stand: 2026-11-01, Release 0.4.0.
+Stand: 2026-11-01, Release 0.5.0.
 
 ---
 
@@ -12,7 +12,7 @@ Stand: 2026-11-01, Release 0.4.0.
 
 | Repo | Rolle | Stand |
 |---|---|---|
-| `LinkedOpenOgham/tei--epidoc-amt` | dieses Repo: OG(H)AM-EpiDoc, sieben Steine, AMT-Graphen | 0.4.0 |
+| `LinkedOpenOgham/tei--epidoc-amt` | dieses Repo: OG(H)AM-EpiDoc, sieben Steine, AMT-Graphen | 0.5.0 |
 | `Research-Squirrel-Engineers/GSAS` | Gradual Semantic Alignment for SKOS: Grade für low/medium/high (4-Level) | nur gelesen (Commit `bdbe0fb`) |
 | `LinkedOpenOgham/tei--epidoc-crosswalk` | Achse 1 (CIDOC CRM), gleiche sieben Basisnamen, `ogham:recordStatus` und Zweifelsprofil am Stein | 0.2.2, nicht angefasst |
 | `alpaca-fair-framework/amt-engine` (früher `n4o-rse/`) | AMT.engine, hier gegen 0.6.0 modelliert | nicht angefasst |
@@ -25,13 +25,13 @@ Nicht neu bauen: die Gewichtungsregel v1 (Gewichte der vier alten Steine identis
 
 **Befunde** (geprüft 2026-10-30):
 
-- AMT wird im Repo **nur als Datenmodell** benutzt: zwei Konzepte (`OghamStone`, `Reading`), eine Rolle (`hasReading`), gewichtete reifizierte Aussagen. **Keine Axiome** (keine Rollenketten, Inversen, Subsumtionen), die Engine wird im Repo nicht aufgerufen. Ein Reasoning-Lauf validiert und exportiert daher nur, er schließt nichts.
+- AMT wird im Repo als Datenmodell **mit fünf Axiomen** benutzt (seit 0.5.0; bis 0.4.0 axiomfrei): vier Konzepte (`OghamStone`, `Inscription`, `Reading`, `Editor`), sieben Rollen, gewichtete reifizierte Aussagen. Axiome: zwei Subsumtionen, zwei Rollenketten (`hasReading` ∘ `attributedTo` ⟹ `readByEditor`, Produktlogik), eine Disjunktheit. Ein Reasoning-Lauf leitet `readByEditor` ab (S3).
 - Die Aussagen waren in 0.1.0 Blank Nodes. Das Turtle war deshalb nicht byte-stabil. Seit 0.2.0 sind es IRIs (`data:stmt_<CIIC>_<Quelle>`).
 - Engine 0.6.0 kennt das Hextupel: `fw:hasType` (Vagueness, Uncertainty, FuzzinessWobbliness, Default Vagueness), `fw:hasMethod`, `fw:derivedFrom` (`fw:TextEvidence` mit `fw:sourceString`). `fw:hasDegreeOfConnection` entspricht `amt:weight`. 0.1.0 trug nichts davon.
 - Die Gewichtsformel `c·a / Σ(c·a)` war nirgends als Methode benannt. Die FW-Ontologie hat `fw:EqualShareRule` (für die Samian-Daten), aber keine passende Regel. Daher `ogham:ConfidenceAgreementRule` im Repo.
 - **Normalisierung versteckt c.** Garranes hat eine einzige Lesung mit c = 0,92, ihr Gewicht ist trotzdem 1,0000. Der Typ (fw:Vagueness) zeigt das jetzt an, das Gewicht allein nicht. Beschlossen 2026-10-30: bleibt so (A4), die Docs erklären es auf der Seite Weights.
 - Gigha 1: sechs historische Lesungen, zwei (Diack 1926, Jackson 1971) sind in der EpiDoc-Datei auskommentiert. Der Konverter verarbeitet vier. Das ist in der README vermerkt.
-- **Nicht geprüft:** ob die Engine/der Runner die Graphen akzeptiert. Der Lauf `--check-only` wurde im Entstehungs-Chat nicht ausgeführt (Ausführung von geklontem Code wurde von der Sandbox verweigert). Stattdessen wurden die SHACL-Shapes der Engine mit pyshacl gegen die Graphen geprüft: konform. Das ersetzt S2 nicht.
+- **Engine-Check:** erledigt 2026-11-01 in der Sandbox (S2): Validierung und Diagnose für alle 14 Graphen (`out/` und `out/v2/`) ohne Befund, Reasoning leitet die erwarteten Kanten ab. Florian bestätigt es lokal mit `python main.py --only check` und `--only reason`.
 
 ## A2 Zielbild
 
@@ -83,6 +83,10 @@ Eigenschaften, die das Ergebnis haben muss:
 | `@cert` an der Edition | Regel v1 liest es nicht (bleibt, Grenze in den Docs). **Regel v2** (Beschluss Flo 2026-11-01): c' = c · k(cert), k aus GSAS 4-Level (low 0,6469 / medium 0,8517 / high 0,9690, ohne cert 1). Methode `ogham:ConfidenceCertAgreementRule`. v2 zusätzlich in `out/v2/`, v1 bleibt in `out/`. Zuordnung TEI-Stufe = GSAS-Stufe und Produkt sind Vorschläge. | 2026-11-01 |
 | `ogham:recordStatus` im AMT-Graphen | am Stein-Knoten, wie im Crosswalk (numbered/lost/doubtful aus dem Bezeichner); ändert kein Gewicht | 2026-11-01 (Flo) |
 | Typzuordnung (D2) | c<1 Vagueness, a<1 Uncertainty bleibt; Bishop Loch behält Vagueness (Objekt-Zweifel ist die dokumentierte Grenze, kein Typ) | 2026-11-01 (Flo) |
+| Axiome (S3) | Fünf Axiome, in der Ontologie, in jedem Graphen mitgeführt; Subsumtionen `hasEditionReading`/`hasHistoricalReading` ⊑ `hasReading`, Rollenketten `hasReading` ∘ `attributedTo` ⟹ `readByEditor` (und für Inschriften), Disjunktheit der beiden Unterrollen. Beschluss Flo 2026-11-01; Inhalt Vorschlag, Review D12. | 2026-11-01 |
+| Proxy für historische Lesungen (S5) | bleibt (Regel v1/v2 vergleichbar); Zeichenwerte ggf. später als Regel v3 | 2026-11-01 (Flo) |
+| Paper/Poster-Abbildungen (D5) | Entscheidung im Poster-Chat; die Paper bleiben unverändert | 2026-11-01 (Flo) |
+| Release/Zenodo, FW-Ontologie (S6/S7) | erst Check und Review, dann Release; FW-Vorschlag danach | 2026-11-01 (Flo) |
 | `<rdg>` ohne `@source` (D8) | bleibt ohne Agent; Rückmeldung ans OG(H)AM-Team (`@source` ergänzen) | 2026-11-01 (Flo) |
 | Datenlizenz (D3) | CC BY 4.0, so in `<licence>` jedes EpiDoc-Headers erklärt; README nennt es | 2026-11-01 |
 | Tags | v0.1.0 = `51072be`, v0.2.0 = `86705fc`, v0.2.1 = `ae78c69`, v0.3.0 = `dd11430`, v0.4.0 = der Commit dieses Patches | 2026-11-01 (Flo) |
@@ -108,8 +112,8 @@ Nicht hochladen: `.venv/`, `.git/`, `build/`, die Abbildungen in `docs/diagrams/
 |---|---|---|---|---|
 | S0 | Festlegungen (Typregel, Methode, IRIs) | tei--epidoc-amt | | erledigt 2026-10-30 (als Vorschlag) |
 | S1 | Skelett, Hextupel, Diagramme, Docs, Tests | tei--epidoc-amt | S0 | erledigt 2026-10-30 |
-| S2 | Engine-/Runner-Check durch Florian | tei--epidoc-amt | S1 | offen |
-| S3 | Axiome: ist Reasoning gewollt? | tei--epidoc-amt | S2 | offen |
+| S2 | Engine-/Runner-Check | tei--epidoc-amt | S1 | erledigt 2026-11-01 (Sandbox; lokal zu bestätigen) |
+| S3 | Axiome | tei--epidoc-amt | S2 | erledigt 2026-11-01 (als Vorschlag, Review offen) |
 | S4 | Einzel-Lesungen: Gewicht und c | tei--epidoc-amt | S1 | erledigt 2026-10-30 (Beschluss: v1 bleibt) |
 | S5 | c(r) historischer Lesungen pro Zeichen | tei--epidoc-amt | S1 | offen |
 | S6 | Methode in die FW-Ontologie | FW_Ontology | S1 | offen |
@@ -220,6 +224,22 @@ Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt
 - 14 Tests grün (fünf neu).
 - Tags setzt Flo selbst (siehe A4).
 
+## S3 — Axiome
+
+**Ziel:** Die Graphen tragen Axiome, mit denen die Engine etwas ableiten kann.
+
+**Abnahme:** Validierung und Diagnose der Engine ohne Befund für alle 14 Graphen; Reasoning leitet Kanten ab, Gewichte nachgerechnet; keine Blank Nodes; zwei Läufe identisch; `hasReading`-Quadrupel unverändert.
+
+### Erledigt 2026-11-01 (Release 0.5.0)
+
+- Beschluss (Flo): Axiome jetzt, in einem größeren Patch, nicht für die Paper (die bleiben), sondern als Weiterentwicklung.
+- Axiome (`ontology/ogham-amt.ttl`, alle 2-stellig-legacy, daher keine Listen und keine Blank Nodes): `AX_editionIsReading`, `AX_historicalIsReading` (Subsumtion unter `hasReading`), `AX_readByEditor`, `AX_inscriptionReadByEditor` (Rollenketten mit `amt:ProductLogic`), `AX_editionOrHistorical` (Disjunktheit).
+- Neu im Modell: Konzept `ogham:Editor`; Rollen `hasEditionReading`, `hasHistoricalReading`, `attributedTo` (Gewicht 1, wird als Quadrupel geschrieben), `readByEditor`, `hasInscriptionReading`, `inscriptionReadByEditor`. Die abgeleiteten Rollen werden nie behauptet.
+- Die `hasReading`-Hextupel bleiben unverändert. Daneben steht je Lesung ein Quadrupel mit der feineren Rolle und demselben Gewicht (so findet auch ein Konsument ohne Rollenhierarchie jede `hasReading`-Kante; die Engine findet dadurch aus den Subsumtionen nichts Neues, das ist beabsichtigt).
+- Blackwaterfoot 1: die Inschriften nutzen `hasInscriptionReading` (Domain `Inscription`), weil die Engine genau eine `rdfs:domain` je Rolle verlangt. Ohne Unterrollen.
+- Engine (Commit `85f8f94`, Version 0.6.0): Validierung ok, Diagnose leer, Konsistenzprüfung ok. Reasoning: Gigha 1 fünf abgeleitete Kanten (je Editor das Gewicht der Lesung), Blackwaterfoot 1 vier (Forsyth 1996: 0,3913, der größere Wert), Bishop Loch eine (1,0).
+- Der Engine-Lauf ist ein eigener Schritt: `python main.py --only reason` (Netz, nicht im Standardlauf).
+
 # Teil D: Offene Punkte
 
 - **D1 erledigt** (2026-10-30, siehe A4 und S4). Für die Paper: die Grenze des Anteil-Modells offen ansprechen.
@@ -230,6 +250,7 @@ Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt
 - **D7 erledigt** (S9). Früher: `ogham:recordStatus` im AMT-Graphen? Der Crosswalk exportiert X/L-Status und Zweifelsprofil am Stein; hier fehlt beides. Für das Poster könnte eine Abfrage über beide Repos reichen. Falls nicht: Status aus dem Bezeichner in `ogham-amt.ttl` aufnehmen (gleicher Begriff, gleicher Vorschlag-Status).
 - **D8 entschieden** (ohne Agent, siehe A4; offen bleibt nur die Rückmeldung ans OG(H)AM-Team). Quelle der `<rdg>` ohne `@source`. Vier Lesungen bei Blackwaterfoot 1 nennen den Bearbeiter nur in der Prosa (Jackson 1973, Forsyth 1996). Entweder die Daten ergänzen (`@source` im OG(H)AM-Repo, Rückmeldung an das OG(H)AM-Team, `lguariento/og-h-am`) oder bewusst ohne Agent lassen.
 - **D9 erledigt** (S9, Regel v2). Früher: `@cert` an der Edition. Gigha 1 und Dyke tragen `cert="low"`; Regel v1 liest es nicht. Soll `cert` in c(r) eingehen (Regel v2, eigenes Methoden-Individuum)? Verwandt mit D2 und mit der Grenze bei Bishop Loch.
-- **D10 `hasReading` ohne Domain.** Der Engine-Check (S2) zeigt, ob Runner/Engine das akzeptieren. Falls nicht: Union-Klasse oder zweite Rolle für Inschriften.
+- **D10 erledigt** (S3): Die Engine lehnte `hasReading` ohne Domain ab („Each Role must have exactly one rdfs:domain“). Domain `OghamStone` ist zurück, Inschriften haben die eigene Rolle `hasInscriptionReading`.
+- **D12 Review der Axiome.** Sind `readByEditor` (Anteil eines Editors am Stein, mit Maximum bei mehreren Lesungen) und die Subsumtionen die Ableitungen, die wir wollen? Mögliche Erweiterungen: Inverse (`readingOf`), Kette über `hasInscription`, Axiome für Unterrollen der Inschriften.
 - **D11 Abbildungen und Matplotlib.** Die eingecheckten Bilder stammen aus Matplotlib 3.9.2 (`requirements.txt` nennt 3.11, das ist falsch); Clip-IDs ändern sich je Plattform. Nur Bilder committen, deren Inhalt sich geändert hat (`05_spectrum`).
 - **D6 erledigt** (Tags 2026-11-01, A4). Früher: Rückwirkende Release-Nummer. Gab es für den Stand vor dieser Arbeit einen Tag 0.1.0? Falls nein, CHANGELOG-Eintrag anpassen.

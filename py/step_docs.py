@@ -111,6 +111,13 @@ def model_page(res) -> str:
 ## Simple view
 
 {figure("01_model", "Simple view")}
+## Axioms
+
+{T.AXIOM_INTRO}
+
+{figure("06_axioms", "The axioms")}
+{axiom_table()}
+
 ## One statement as a hextuple
 
 {T.HEXTUPLE_INTRO.format(release=RELEASE)}
@@ -122,6 +129,24 @@ The same statement in Turtle, taken from `out/`:
 {hextuple_example(res)}
 ```
 """
+
+
+def axiom_table() -> str:
+    """The axioms, read from the ontology."""
+    g = load_ontology()
+    rows = []
+    for kind, label in ((AMT.SubsumptionAxiom, "Subsumption"), (AMT.RoleChainAxiom, "Role chain"),
+                        (AMT.DisjointAxiom, "Disjointness")):
+        for s in sorted(g.subjects(RDF.type, kind), key=str):
+            if kind == AMT.SubsumptionAxiom:
+                text = f"`{short(g.value(s, AMT.subRole))}` is a kind of `{short(g.value(s, AMT.superRole))}`"
+            elif kind == AMT.RoleChainAxiom:
+                text = (f"`{short(g.value(s, AMT.antecedent1))}` then `{short(g.value(s, AMT.antecedent2))}` gives "
+                        f"`{short(g.value(s, AMT.consequent))}` ({short(g.value(s, AMT.logic))})")
+            else:
+                text = f"`{short(g.value(s, AMT.role1))}` and `{short(g.value(s, AMT.role2))}` do not hold of the same pair"
+            rows.append(f"| `ogham:{short(s)}` | {label} | {text} |")
+    return "| Axiom | Kind | Says |\n|---|---|---|\n" + "\n".join(rows)
 
 
 def vocabulary_page() -> str:
@@ -238,10 +263,15 @@ def run_page(res) -> str:
 - every statement has exactly one weight, one method and one piece of evidence, and at most one type;
 - the evidence string equals the label of the reading;
 - no statement is a blank node, and two conversions give identical Turtle;
+- the finer-role statement (`hasEditionReading` or `hasHistoricalReading`) carries the weight of its `hasReading` statement;
+- every attribution has weight 1, and no reading without a source has one;
 - the type follows the rule: c < 1 vagueness, a < 1 uncertainty, both fuzziness-wobbliness, neither none.
 
 The SHACL shapes of the AMT engine are not part of the default build, because they live in the engine
 repository. The runner applies them in the next step.
+
+The engine itself was run on these graphs for release {RELEASE} (see the PRIMER, S3): validation passes, the
+diagnostics report nothing, and reasoning derives the editor edges described below.
 
 ## Check with the AMT runner
 

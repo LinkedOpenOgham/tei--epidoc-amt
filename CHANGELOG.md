@@ -3,6 +3,33 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.5.0] - 2026-11-01
+
+Gives the graphs axioms, so that the AMT engine has something to derive. Checked with the engine (commit `85f8f94`).
+
+### Added
+- **Five axioms** in `ontology/ogham-amt.ttl`, copied into every graph (legacy two-step chains, so no blank nodes):
+  `hasEditionReading` and `hasHistoricalReading` are kinds of `hasReading`; `hasReading` then `attributedTo` gives
+  `readByEditor`, and `hasInscriptionReading` then `attributedTo` gives `inscriptionReadByEditor` (product logic);
+  the two sub-roles are disjoint. *Proposals.*
+- Concept `ogham:Editor`; roles `hasEditionReading`, `hasHistoricalReading`, `attributedTo`, `readByEditor`,
+  `hasInscriptionReading`, `inscriptionReadByEditor`.
+- In every graph: a statement with the finer role and the same weight next to each `hasReading` statement, and a
+  weight-1 `attributedTo` statement for each reading whose source the file names.
+- Step `reason` (`python main.py --only reason`, network): lets the engine reason and lists the derived edges in
+  `build/reason-report.txt`. Step `check` now covers the graphs of rule v2 as well.
+- Figure `06_axioms`; page Model has an axiom table; page Run states what the engine derives. Tests: 19 in all.
+
+### Changed
+- `ogham:hasReading` has its domain `OghamStone` again: the engine requires exactly one `rdfs:domain` per role and
+  rejected the graphs of 0.3.0 and 0.4.0 without one. The inscriptions of Blackwaterfoot 1 use the new role
+  `hasInscriptionReading` (domain `Inscription`) instead of `hasReading`.
+- Figure `01_model`: the editor is a class with the weighted link `attributedTo`.
+
+### Unchanged
+- Every `hasReading` statement of the single-inscription stones: subject, object, weight, type, method and evidence.
+  Rule v1 and v2, and every weight.
+
 ## [0.4.0] - 2026-11-01
 
 ### Added

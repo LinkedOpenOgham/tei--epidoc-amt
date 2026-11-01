@@ -5,6 +5,7 @@
   02_hextuple    one reading as a hextuple, from the real data       (full semantics)
   03_weighting   from the EpiDoc markup to amt:weight and fw:hasType
   04_gigha       Gigha 1: one stone, five competing readings, with weights and types
+  06_axioms      the axioms: sub-roles of hasReading, the editor chain
   05_spectrum    the stones side by side, one bar per stone (per inscription where a file holds
                  several), one segment per reading
 
@@ -49,18 +50,49 @@ def figure_model():
     y0 = 3.1
     stone = node(ax, 3.4, y0, 4.8, 1.5, "OghamStone", "class", size=11)
     reading = node(ax, 11.3, y0, 4.8, 1.5, "Reading", "class", size=11)
-    agent = node(ax, 19.2, y0, 4.8, 1.5, "prov:Agent", "axiom", size=11, sub="the editor")
+    agent = node(ax, 19.2, y0, 4.8, 1.5, "Editor", "class", size=11, sub="also a prov:Agent")
     xa, xb = stone["right"][0] + 0.1, reading["left"][0] - 0.1
     arrow(ax, (xa, y0), (xb, y0), "hasReading", label_dy=0.42, boxed=False, size=11)
     ax.text((xa + xb) / 2, y0 - 0.55, "amt:weight\nfw:hasType, fw:hasMethod", ha="center", va="center",
             fontsize=8.5, color=MUTED)
-    arrow(ax, (reading["right"][0] + 0.1, y0), (agent["left"][0] - 0.1, y0), "prov:\nwasAttributedTo",
-          color=BRIGHT, dashed=True, label_dy=0.62, boxed=False, size=10)
+    arrow(ax, (reading["right"][0] + 0.1, y0), (agent["left"][0] - 0.1, y0), "attributedTo",
+          label_dy=0.42, boxed=False, size=10)
+    ax.text((reading["right"][0] + agent["left"][0]) / 2, y0 - 0.55, "weight 1", ha="center", va="center",
+            fontsize=8.5, color=MUTED)
     ax.text(11.3, 1.35, "One statement per reading. The weights of the readings of one stone add up to 1.",
             ha="center", fontsize=9, color=MUTED)
-    legend(ax, 0.0, 0.5, [("class", "class (amt:Concept)"), ("solid", "weighted statement (hextuple)"),
-                          ("bright", "plain RDF link (PROV)"), ("axiom", "external class")], gap=5.6)
+    legend(ax, 0.0, 0.5, [("class", "class (amt:Concept)"), ("solid", "weighted statement")], gap=5.6)
     save(fig, "01_model")
+
+
+# ── 06 ───────────────────────────────────────────────────────────────────────
+def figure_axioms():
+    fig, ax = canvas(9.4)
+    title(ax, 8.8, "The axioms of the model: what the engine can derive")
+    # subsumption
+    ed = node(ax, 4.2, 6.7, 6.4, 1.4, "hasEditionReading", "role", size=10, sub="edition of the OG(H)AM team")
+    hi = node(ax, 4.2, 4.5, 6.4, 1.4, "hasHistoricalReading", "role", size=10, sub="apparatus, earlier editors")
+    hr = node(ax, 12.0, 5.6, 5.2, 1.6, "hasReading", "role", size=11, sub="stone to reading")
+    arrow(ax, (ed["right"][0] + 0.1, ed["right"][1]), (hr["left"][0] - 0.1, hr["left"][1] + 0.3),
+          "is a", t=0.5, size=9)
+    arrow(ax, (hi["right"][0] + 0.1, hi["right"][1]), (hr["left"][0] - 0.1, hr["left"][1] - 0.3),
+          "is a", t=0.5, size=9)
+    ax.text(4.2, 3.2, "disjoint: no reading is both", ha="center", fontsize=8.5, color=MUTED)
+    # chain
+    at = node(ax, 17.6, 7.4, 4.2, 1.4, "attributedTo", "role", size=10, sub="reading to editor, weight 1")
+    rb = node(ax, 17.6, 3.6, 4.2, 1.4, "readByEditor", "term", size=10, sub="derived, never asserted")
+    arrow(ax, (hr["right"][0] + 0.1, hr["cy"] + 0.3), (at["left"][0] - 0.1, at["cy"] - 0.1),
+          "then", t=0.5, size=9)
+    arrow(ax, (hr["right"][0] + 0.1, hr["cy"] - 0.3), (rb["left"][0] - 0.1, rb["cy"] + 0.1),
+          "gives", t=0.5, size=9, color=BRIGHT, dashed=True)
+    arrow(ax, (at["bottom"][0], at["bottom"][1] - 0.1), (rb["top"][0], rb["top"][1] + 0.1),
+          "", color=BRIGHT, dashed=True)
+    ax.text(0.0, 1.9, "Product logic: the attribution has weight 1, so the derived weight is the weight of the reading. "
+            "An editor with two readings keeps the larger.", fontsize=8.5, color=MUTED, va="center")
+    ax.text(0.0, 1.35, "Inscriptions (Blackwaterfoot 1) use hasInscriptionReading and inscriptionReadByEditor "
+            "in the same way, without the sub-roles.", fontsize=8.5, color=MUTED, va="center")
+    legend(ax, 0.0, 0.5, [("role", "role (amt:Role)"), ("term", "derived role"), ("dashed", "inferred by the engine")], gap=5.6)
+    save(fig, "06_axioms")
 
 
 # ── 02 ───────────────────────────────────────────────────────────────────────
@@ -201,7 +233,8 @@ def main() -> int:
     figure_weighting()
     figure_gigha(results)
     figure_spectrum(results)
-    print("wrote docs/diagrams/01_model, 02_hextuple, 03_weighting, 04_gigha, 05_spectrum (.svg + .png)")
+    figure_axioms()
+    print("wrote docs/diagrams/01_model, 02_hextuple, 03_weighting, 04_gigha, 05_spectrum, 06_axioms (.svg + .png)")
     return 0
 
 

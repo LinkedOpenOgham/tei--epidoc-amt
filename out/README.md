@@ -73,7 +73,7 @@ data:evidence_506_MAC1902 a fw:TextEvidence ;
     fw:sourceString "VICULA MAQ COMGINI" .
 ```
 
-The graphs contain no axioms. The reasoning engine ([`alpaca-fair-framework/amt-engine`](https://github.com/alpaca-fair-framework/amt-engine)) validates and exports them; it has nothing to derive until axioms are added, and would then combine weights with the logic of the axiom (for example `amt:ProductLogic`).
+**Axioms** (in `ontology/ogham-amt.ttl`, copied into every graph): `hasEditionReading` and `hasHistoricalReading` are kinds of `hasReading` (subsumption; the finer statement is written with the same weight next to the `hasReading` hextuple), and the chain `hasReading` then `attributedTo` gives `readByEditor` with product logic (the attribution has weight 1, so the weight of the reading carries over). The engine ([`alpaca-fair-framework/amt-engine`](https://github.com/alpaca-fair-framework/amt-engine)) derives `hasReading` and `readByEditor` from them; `amt:ProductLogic` is the logic of the chains. `python main.py --only reason` shows what it derives.
 
 ## 5. Per stone
 

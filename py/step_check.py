@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ogham_amt_utils import BUILD, OUT, STONES, rel, write_text  # noqa: E402
+from ogham_amt_utils import BUILD, OUT, OUT_V2, STONES, rel, write_text  # noqa: E402
 
 RUNNER_URL = "https://github.com/alpaca-fair-framework/amt-runner.git"
 
@@ -33,8 +33,9 @@ def run() -> int:
             print("FAIL  could not clone the amt-runner (network?)", file=sys.stderr)
             return 2
     report, failed = [], 0
-    for _, base in STONES:
-        ttl = OUT / f"{base}.amt.ttl"
+    graphs = [(base, OUT / f"{base}.amt.ttl") for _, base in STONES]
+    graphs += [(f"v2/{base}", OUT_V2 / f"{base}.amt.ttl") for _, base in STONES]
+    for base, ttl in graphs:
         cmd = [sys.executable, str(runner / "run_amt.py"), str(ttl), "--check-only", "--update"]
         print(f"\n== {base}")
         p = subprocess.run(cmd, capture_output=True, text=True)

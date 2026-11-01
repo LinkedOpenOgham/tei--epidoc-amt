@@ -313,6 +313,8 @@ def local_names(stone: dict, readings: list[Reading]) -> list[dict]:
             "reading": f"reading_{ident}_{key}{suffix}",
             "statement": f"stmt_{ident}_{key}{suffix}",
             "evidence": f"evidence_{ident}_{key}{suffix}",
+            "kind": f"kind_{ident}_{key}{suffix}",
+            "attribution": f"attr_{ident}_{key}{suffix}",
             "agent": f"agent_{slug(r.source_id)}" if r.source_id else None,
         })
     return names
@@ -354,12 +356,18 @@ def build_graph(stone: dict, readings: list[Reading], rule: str = "v1") -> Graph
         if n["agent"]:                               # a <rdg> without @source has no attributable editor
             agent = DATA_NS[n["agent"]]
             g.add((agent, RDF.type, PROV.Agent))
+            g.add((agent, AMT.instanceOf, OGHAM.Editor))
             g.add((agent, RDFS.label, Literal(r.editor)))
             g.add((r_uri, PROV.wasAttributedTo, agent))
+            att = DATA_NS[n["attribution"]]          # the weighted link the editor chains run on
+            g.add((att, RDF.subject, r_uri))
+            g.add((att, RDF.predicate, OGHAM.attributedTo))
+            g.add((att, RDF.object, agent))
+            g.add((att, AMT.weight, Literal("1.0000", datatype=XSD.decimal)))
 
         st, ev = DATA_NS[n["statement"]], DATA_NS[n["evidence"]]
         g.add((st, RDF.subject, subject_iri(stone, r.inscription)))
-        g.add((st, RDF.predicate, OGHAM.hasReading))
+        g.add((st, RDF.predicate, OGHAM.hasReading if r.inscription is None else OGHAM.hasInscriptionReading))
         g.add((st, RDF.object, r_uri))
         g.add((st, AMT.weight, Literal(f"{r.weight:.4f}", datatype=XSD.decimal)))
         t = reading_type(r)
@@ -369,6 +377,12 @@ def build_graph(stone: dict, readings: list[Reading], rule: str = "v1") -> Graph
         g.add((st, FW.derivedFrom, ev))
         g.add((ev, RDF.type, FW.TextEvidence))
         g.add((ev, FW.sourceString, Literal(r.text)))
+        if r.inscription is None:                    # the finer role, with the same weight: what the subsumption axioms use
+            kd = DATA_NS[n["kind"]]
+            g.add((kd, RDF.subject, s_uri))
+            g.add((kd, RDF.predicate, OGHAM.hasEditionReading if r.is_edition else OGHAM.hasHistoricalReading))
+            g.add((kd, RDF.object, r_uri))
+            g.add((kd, AMT.weight, Literal(f"{r.weight:.4f}", datatype=XSD.decimal)))
     return g
 
 
@@ -477,10 +491,14 @@ def write_out_readme(results: list[tuple[dict, list[Reading], str]]) -> None:
         "The normalised weights are a belief distribution, bridged to CIDOC CRM's argumentation model "
         "**CRMinf (I2 Belief)**. Literal shape, taken from the data:\n")
     add("```turtle\n" + hextuple_example(results) + "\n```\n")
-    add("The graphs contain no axioms. The reasoning engine "
+    add("**Axioms** (in `ontology/ogham-amt.ttl`, copied into every graph): `hasEditionReading` and "
+        "`hasHistoricalReading` are kinds of `hasReading` (subsumption; the finer statement is written with "
+        "the same weight next to the `hasReading` hextuple), and the chain `hasReading` then `attributedTo` gives "
+        "`readByEditor` with product logic (the attribution has weight 1, so the weight of the reading carries "
+        "over). The engine "
         "([`alpaca-fair-framework/amt-engine`](https://github.com/alpaca-fair-framework/amt-engine)) "
-        "validates and exports them; it has nothing to derive until axioms are added, and would then combine "
-        f"weights with the logic of the axiom (for example `{FUZZY_LOGIC}`).\n")
+        f"derives `hasReading` and `readByEditor` from them; `{FUZZY_LOGIC}` is the logic of the chains. "
+        "`python main.py --only reason` shows what it derives.\n")
 
     add("## 5. Per stone\n")
     for stone, readings, out in results:

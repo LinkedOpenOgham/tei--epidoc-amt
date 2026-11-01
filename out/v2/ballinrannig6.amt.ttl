@@ -8,12 +8,46 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+data:attr_153_OGHAM_NW amt:weight 1.0000 ;
+    rdf:object data:agent_OGHAM_NW ;
+    rdf:predicate ogham:attributedTo ;
+    rdf:subject data:reading_153_OGHAM_NW .
+
+data:kind_153_OGHAM_NW amt:weight 1.0000 ;
+    rdf:object data:reading_153_OGHAM_NW ;
+    rdf:predicate ogham:hasEditionReading ;
+    rdf:subject data:stone_153 .
+
 data:stmt_153_OGHAM_NW amt:weight 1.0000 ;
     fw:derivedFrom data:evidence_153_OGHAM_NW ;
     fw:hasMethod ogham:ConfidenceCertAgreementRule ;
     rdf:object data:reading_153_OGHAM_NW ;
     rdf:predicate ogham:hasReading ;
     rdf:subject data:stone_153 .
+
+ogham:AX_editionIsReading a amt:SubsumptionAxiom ;
+    amt:subRole ogham:hasEditionReading ;
+    amt:superRole ogham:hasReading .
+
+ogham:AX_editionOrHistorical a amt:DisjointAxiom ;
+    amt:role1 ogham:hasEditionReading ;
+    amt:role2 ogham:hasHistoricalReading .
+
+ogham:AX_historicalIsReading a amt:SubsumptionAxiom ;
+    amt:subRole ogham:hasHistoricalReading ;
+    amt:superRole ogham:hasReading .
+
+ogham:AX_inscriptionReadByEditor a amt:RoleChainAxiom ;
+    amt:antecedent1 ogham:hasInscriptionReading ;
+    amt:antecedent2 ogham:attributedTo ;
+    amt:consequent ogham:inscriptionReadByEditor ;
+    amt:logic amt:ProductLogic .
+
+ogham:AX_readByEditor a amt:RoleChainAxiom ;
+    amt:antecedent1 ogham:hasReading ;
+    amt:antecedent2 ogham:attributedTo ;
+    amt:consequent ogham:readByEditor ;
+    amt:logic amt:ProductLogic .
 
 ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
     rdfs:label "confidence times agreement rule"@en ;
@@ -35,19 +69,8 @@ ogham:recordStatus a rdf:Property ;
     skos:definition "Whether the record is numbered, lost or doubtful, as the series letter of its identifier says." ;
     skos:scopeNote "Says nothing about the reading and does not change any weight: a stone with one reading has weight 1 whatever its status. Proposed term." .
 
-data:agent_OGHAM_NW a prov:Agent ;
-    rdfs:label "OG(H)AM edition (NW)" .
-
 data:evidence_153_OGHAM_NW a fw:TextEvidence ;
     fw:sourceString "CCICAMINIvac. MAQQ[/I] C[A]TTINI" .
-
-data:reading_153_OGHAM_NW rdfs:label "CCICAMINIvac. MAQQ[/I] C[A]TTINI" ;
-    amt:instanceOf ogham:Reading ;
-    prov:wasAttributedTo data:agent_OGHAM_NW .
-
-data:stone_153 rdfs:label "Baile an Reannaigh | Ballinrannig 6 (CIIC 153)" ;
-    amt:instanceOf ogham:OghamStone ;
-    ogham:recordStatus "numbered" .
 
 ogham:ConfidenceCertAgreementRule a fw:RuleBasedMethod ;
     rdfs:label "confidence times certainty times agreement rule"@en ;
@@ -55,16 +78,76 @@ ogham:ConfidenceCertAgreementRule a fw:RuleBasedMethod ;
     fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> ;
     rdfs:comment "Rule v1 with the certainty of the edition as a further factor: weight of a reading among the readings of one stone (or inscription) is c(r) times k(cert) times a(r), divided by the sum of these products. k is the GSAS degree of the level given by the @cert of the edition (low 0.6469, medium 0.8517, high 0.9690), and 1 for an edition without @cert and for every apparatus reading. Four decimals."@en .
 
+ogham:hasInscriptionReading a amt:Role ;
+    rdfs:label "has inscription reading" ;
+    rdfs:domain ogham:Inscription ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The inscription is read this way. Used instead of hasReading where a record has several inscriptions; the weight is the share of the reading among the readings of that inscription." ;
+    skos:scopeNote "Same weight rule as hasReading. No sub-roles: the inscriptions of Blackwaterfoot 1 carry the axioms only through the editor chain." .
+
+ogham:inscriptionReadByEditor a amt:Role ;
+    rdfs:label "inscription read by editor" ;
+    rdfs:domain ogham:Inscription ;
+    rdfs:range ogham:Editor ;
+    skos:definition "Like readByEditor, for an inscription: derived by axiom ogham:AX_inscriptionReadByEditor from hasInscriptionReading and attributedTo." ;
+    skos:scopeNote "Never asserted in the graphs." .
+
+ogham:readByEditor a amt:Role ;
+    rdfs:label "read by editor" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Editor ;
+    skos:definition "The weight the readings of the editor carry for the stone: derived by axiom ogham:AX_readByEditor from hasReading and attributedTo." ;
+    skos:scopeNote "Never asserted in the graphs; it appears only when the engine reasons. If one editor has several readings of a stone, the engine keeps the largest weight." .
+
+data:agent_OGHAM_NW a prov:Agent ;
+    rdfs:label "OG(H)AM edition (NW)" ;
+    amt:instanceOf ogham:Editor .
+
+data:stone_153 rdfs:label "Baile an Reannaigh | Ballinrannig 6 (CIIC 153)" ;
+    amt:instanceOf ogham:OghamStone ;
+    ogham:recordStatus "numbered" .
+
+ogham:hasHistoricalReading a amt:Role ;
+    rdfs:label "has historical reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way by an earlier editor, as the apparatus records it. A kind of hasReading (axiom ogham:AX_historicalIsReading)." ;
+    skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
+
+data:reading_153_OGHAM_NW rdfs:label "CCICAMINIvac. MAQQ[/I] C[A]TTINI" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_NW .
+
 ogham:Inscription a amt:Concept ;
     rdfs:label "Inscription" ;
     rdfs:comment "One inscription on a monument whose record describes several (Blackwaterfoot 1 has two with a reading). It exists only for those records: for a record with one inscription, the stone stands for it." ;
     skos:scopeNote "Not a text: the text is the reading. Readings of different inscriptions are not alternatives of each other, so their weights are computed within the inscription." .
 
+ogham:attributedTo a amt:Role ;
+    rdfs:label "attributed to" ;
+    rdfs:domain ogham:Reading ;
+    rdfs:range ogham:Editor ;
+    skos:definition "The reading is the editor's reading. Written with weight 1 for every reading whose source the file names." ;
+    skos:scopeNote "The weight 1 says that the attribution is as the file gives it, not that the reading is correct. It is the second link of the editor chains. The same fact is also written as prov:wasAttributedTo." .
+
+ogham:hasEditionReading a amt:Role ;
+    rdfs:label "has edition reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way in the current edition of the OG(H)AM team. A kind of hasReading (axiom ogham:AX_editionIsReading)." ;
+    skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
+
+ogham:Editor a amt:Concept ;
+    rdfs:label "Editor" ;
+    rdfs:comment "A person or edition team that read the inscription the way a reading says: Rhys 1899, Macalister 1945, the OG(H)AM edition (KF). Known from the source id of the reading; a reading without a source has none." ;
+    skos:scopeNote "Not the author of the weight: the weight is computed by the rule, not given by the editor." .
+
 ogham:hasReading a amt:Role ;
     rdfs:label "has reading" ;
+    rdfs:domain ogham:OghamStone ;
     rdfs:range ogham:Reading ;
-    skos:definition "The stone, or its inscription where the record has several, is read this way by an editor. Each statement carries the weight of that reading among the readings of the same stone or inscription." ;
-    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. The subject is an ogham:OghamStone, or an ogham:Inscription in a record with several inscriptions; a formal domain is left out for that reason." .
+    skos:definition "The stone is read this way by an editor. Each statement carries the weight of that reading among the readings of the stone." ;
+    skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. In a record with several inscriptions the subject is the inscription and the role is ogham:hasInscriptionReading." .
 
 ogham:Reading a amt:Concept ;
     rdfs:label "Reading" ;

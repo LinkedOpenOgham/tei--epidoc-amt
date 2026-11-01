@@ -17,10 +17,15 @@ to run the check yourself.
 - every statement has exactly one weight, one method and one piece of evidence, and at most one type;
 - the evidence string equals the label of the reading;
 - no statement is a blank node, and two conversions give identical Turtle;
+- the finer-role statement (`hasEditionReading` or `hasHistoricalReading`) carries the weight of its `hasReading` statement;
+- every attribution has weight 1, and no reading without a source has one;
 - the type follows the rule: c < 1 vagueness, a < 1 uncertainty, both fuzziness-wobbliness, neither none.
 
 The SHACL shapes of the AMT engine are not part of the default build, because they live in the engine
 repository. The runner applies them in the next step.
+
+The engine itself was run on these graphs for release 0.5.0 (see the PRIMER, S3): validation passes, the
+diagnostics report nothing, and reasoning derives the editor edges described below.
 
 ## Check with the AMT runner
 
@@ -38,9 +43,19 @@ writes no output. The report is `build/check-report.txt`.
 
 ## What the engine does with these graphs
 
-The graphs contain **no axioms** (no role chains, inverses or subsumptions). A full run of the runner
-therefore validates and exports, but infers nothing. Axioms are a modelling decision, not a technicality. The
-proposals are in the PRIMER, steps S3 to S5.
+The graphs contain five axioms (two subsumptions, two role chains, one disjointness). A full run of the
+engine therefore derives `readByEditor` (or `inscriptionReadByEditor`): how much weight the readings of one editor
+carry for the stone. For Gigha 1 it derives five edges: Macalister 1902 and 1945 0.2727 each, the OG(H)AM
+edition (KF) and Rhys 1899 0.1818 each, Rhys 1901 0.0909; each is the weight of the reading of that editor. An
+editor with two readings of one inscription keeps the larger weight (Forsyth 1996 on the second inscription of
+Blackwaterfoot 1: 0.3913). The subsumptions derive nothing new, because the `hasReading` edges are asserted too;
+they document the hierarchy for the engine. The disjointness axiom is checked by the engine's consistency check.
+
+```
+python main.py --only reason
+```
+
+writes the reasoned graphs and reports into `build/reasoned/` (network; not part of the default build).
 
 ## Questions for review
 
