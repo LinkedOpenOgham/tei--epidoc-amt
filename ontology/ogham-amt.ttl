@@ -70,6 +70,13 @@ ogham:hasInscriptionReading a amt:Role ;
     skos:definition "The inscription is read this way. Used instead of hasReading where a record has several inscriptions; the weight is the share of the reading among the readings of that inscription." ;
     skos:scopeNote "Same weight rule as hasReading. No sub-roles: the inscriptions of Blackwaterfoot 1 carry the axioms only through the editor chain." .
 
+ogham:readingOf a amt:Role ;
+    rdfs:label "reading of" ;
+    rdfs:domain ogham:Reading ;
+    rdfs:range ogham:OghamStone ;
+    skos:definition "The reading is a reading of this stone, or of this inscription where a record has several. The other direction of hasReading and hasInscriptionReading, with the same weight." ;
+    skos:scopeNote "Written next to every hasReading or hasInscriptionReading statement, because the engine has no inverse axiom. The range is the stone; for a record with several inscriptions the object is the inscription." .
+
 ogham:attributedTo a amt:Role ;
     rdfs:label "attributed to" ;
     rdfs:domain ogham:Reading ;

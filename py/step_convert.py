@@ -315,6 +315,7 @@ def local_names(stone: dict, readings: list[Reading]) -> list[dict]:
             "evidence": f"evidence_{ident}_{key}{suffix}",
             "kind": f"kind_{ident}_{key}{suffix}",
             "attribution": f"attr_{ident}_{key}{suffix}",
+            "reverse": f"rev_{ident}_{key}{suffix}",
             "agent": f"agent_{slug(r.source_id)}" if r.source_id else None,
         })
     return names
@@ -377,6 +378,11 @@ def build_graph(stone: dict, readings: list[Reading], rule: str = "v1") -> Graph
         g.add((st, FW.derivedFrom, ev))
         g.add((ev, RDF.type, FW.TextEvidence))
         g.add((ev, FW.sourceString, Literal(r.text)))
+        rv = DATA_NS[n["reverse"]]                   # the other direction, same weight (the engine has no inverse construct)
+        g.add((rv, RDF.subject, r_uri))
+        g.add((rv, RDF.predicate, OGHAM.readingOf))
+        g.add((rv, RDF.object, subject_iri(stone, r.inscription)))
+        g.add((rv, AMT.weight, Literal(f"{r.weight:.4f}", datatype=XSD.decimal)))
         if r.inscription is None:                    # the finer role, with the same weight: what the subsumption axioms use
             kd = DATA_NS[n["kind"]]
             g.add((kd, RDF.subject, s_uri))

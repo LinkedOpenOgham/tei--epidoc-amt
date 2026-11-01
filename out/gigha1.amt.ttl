@@ -58,6 +58,31 @@ data:kind_506_RHY1901 amt:weight 0.0909 ;
     rdf:predicate ogham:hasHistoricalReading ;
     rdf:subject data:stone_506 .
 
+data:rev_506_MAC1902 amt:weight 0.2727 ;
+    rdf:object data:stone_506 ;
+    rdf:predicate ogham:readingOf ;
+    rdf:subject data:reading_506_MAC1902 .
+
+data:rev_506_MAC1945 amt:weight 0.2727 ;
+    rdf:object data:stone_506 ;
+    rdf:predicate ogham:readingOf ;
+    rdf:subject data:reading_506_MAC1945 .
+
+data:rev_506_OGHAM_KF amt:weight 0.1818 ;
+    rdf:object data:stone_506 ;
+    rdf:predicate ogham:readingOf ;
+    rdf:subject data:reading_506_OGHAM_KF .
+
+data:rev_506_RHY1899 amt:weight 0.1818 ;
+    rdf:object data:stone_506 ;
+    rdf:predicate ogham:readingOf ;
+    rdf:subject data:reading_506_RHY1899 .
+
+data:rev_506_RHY1901 amt:weight 0.0909 ;
+    rdf:object data:stone_506 ;
+    rdf:predicate ogham:readingOf ;
+    rdf:subject data:reading_506_RHY1901 .
+
 data:stmt_506_MAC1902 amt:weight 0.2727 ;
     fw:derivedFrom data:evidence_506_MAC1902 ;
     fw:hasMethod ogham:ConfidenceAgreementRule ;
@@ -198,6 +223,18 @@ data:agent_RHY1901 a prov:Agent ;
     rdfs:label "Rhys 1901" ;
     amt:instanceOf ogham:Editor .
 
+ogham:Inscription a amt:Concept ;
+    rdfs:label "Inscription" ;
+    rdfs:comment "One inscription on a monument whose record describes several (Blackwaterfoot 1 has two with a reading). It exists only for those records: for a record with one inscription, the stone stands for it." ;
+    skos:scopeNote "Not a text: the text is the reading. Readings of different inscriptions are not alternatives of each other, so their weights are computed within the inscription." .
+
+ogham:hasEditionReading a amt:Role ;
+    rdfs:label "has edition reading" ;
+    rdfs:domain ogham:OghamStone ;
+    rdfs:range ogham:Reading ;
+    skos:definition "The stone is read this way in the current edition of the OG(H)AM team. A kind of hasReading (axiom ogham:AX_editionIsReading)." ;
+    skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
+
 data:reading_506_MAC1902 rdfs:label "VICULA MAQ COMGINI" ;
     amt:instanceOf ogham:Reading ;
     prov:wasAttributedTo data:agent_MAC1902 .
@@ -218,23 +255,18 @@ data:reading_506_RHY1901 rdfs:label "OGMA MAQI TIGERNI" ;
     amt:instanceOf ogham:Reading ;
     prov:wasAttributedTo data:agent_RHY1901 .
 
-ogham:Inscription a amt:Concept ;
-    rdfs:label "Inscription" ;
-    rdfs:comment "One inscription on a monument whose record describes several (Blackwaterfoot 1 has two with a reading). It exists only for those records: for a record with one inscription, the stone stands for it." ;
-    skos:scopeNote "Not a text: the text is the reading. Readings of different inscriptions are not alternatives of each other, so their weights are computed within the inscription." .
-
-ogham:hasEditionReading a amt:Role ;
-    rdfs:label "has edition reading" ;
-    rdfs:domain ogham:OghamStone ;
-    rdfs:range ogham:Reading ;
-    skos:definition "The stone is read this way in the current edition of the OG(H)AM team. A kind of hasReading (axiom ogham:AX_editionIsReading)." ;
-    skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
-
 ogham:ConfidenceAgreementRule a fw:RuleBasedMethod ;
     rdfs:label "confidence times agreement rule"@en ;
     fw:formula "c(r) * a(r) / sum(c * a)" ;
     fw:implementedBy <https://github.com/LinkedOpenOgham/tei--epidoc-amt/blob/main/py/step_convert.py> ;
     rdfs:comment "Weight of a reading among the readings of one stone: the reading confidence c(r) (from the doubt markup of the reading) times the tradition agreement a(r) (the share of readings that cluster with it), divided by the sum of these products over all readings of the stone. Four decimals."@en .
+
+ogham:readingOf a amt:Role ;
+    rdfs:label "reading of" ;
+    rdfs:domain ogham:Reading ;
+    rdfs:range ogham:OghamStone ;
+    skos:definition "The reading is a reading of this stone, or of this inscription where a record has several. The other direction of hasReading and hasInscriptionReading, with the same weight." ;
+    skos:scopeNote "Written next to every hasReading or hasInscriptionReading statement, because the engine has no inverse axiom. The range is the stone; for a record with several inscriptions the object is the inscription." .
 
 ogham:hasHistoricalReading a amt:Role ;
     rdfs:label "has historical reading" ;
@@ -242,10 +274,6 @@ ogham:hasHistoricalReading a amt:Role ;
     rdfs:range ogham:Reading ;
     skos:definition "The stone is read this way by an earlier editor, as the apparatus records it. A kind of hasReading (axiom ogham:AX_historicalIsReading)." ;
     skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
-
-ogham:OghamStone a amt:Concept ;
-    rdfs:label "Ogham stone" ;
-    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .
 
 ogham:attributedTo a amt:Role ;
     rdfs:label "attributed to" ;
@@ -259,6 +287,10 @@ ogham:Editor a amt:Concept ;
     rdfs:comment "A person or edition team that read the inscription the way a reading says: Rhys 1899, Macalister 1945, the OG(H)AM edition (KF). Known from the source id of the reading; a reading without a source has none." ;
     skos:scopeNote "Not the author of the weight: the weight is computed by the rule, not given by the editor." .
 
+ogham:OghamStone a amt:Concept ;
+    rdfs:label "Ogham stone" ;
+    rdfs:comment "A monument that carries an ogham inscription, as one OG(H)AM EpiDoc file describes it. Identified by its CIIC number, or by the name of its record where it has none." .
+
 ogham:hasReading a amt:Role ;
     rdfs:label "has reading" ;
     rdfs:domain ogham:OghamStone ;
@@ -266,10 +298,10 @@ ogham:hasReading a amt:Role ;
     skos:definition "The stone is read this way by an editor. Each statement carries the weight of that reading among the readings of the stone." ;
     skos:scopeNote "Does not say that the reading is correct, and does not say which editor is more reliable: the weight is the normalised product of reading confidence and tradition agreement (rule v1). It has no inverse, because a share among alternatives is directional. In a record with several inscriptions the subject is the inscription and the role is ogham:hasInscriptionReading." .
 
-data:stone_506 rdfs:label "Gigha 1 (CIIC 506)" ;
-    amt:instanceOf ogham:OghamStone ;
-    ogham:recordStatus "numbered" .
-
 ogham:Reading a amt:Concept ;
     rdfs:label "Reading" ;
     rdfs:comment "One transliteration of the inscription: either the current edition of the OG(H)AM team or a historical reading from the apparatus of the EpiDoc file." .
+
+data:stone_506 rdfs:label "Gigha 1 (CIIC 506)" ;
+    amt:instanceOf ogham:OghamStone ;
+    ogham:recordStatus "numbered" .

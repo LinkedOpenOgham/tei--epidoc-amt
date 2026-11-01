@@ -164,6 +164,15 @@ class AxiomTests(unittest.TestCase):
             self.assertEqual(len(list(g.subjects(RDF.type, AMT.RoleChainAxiom))), 2, base)
             self.assertEqual(len(list(g.subjects(RDF.type, AMT.DisjointAxiom))), 1, base)
 
+    def test_reverse_statement_has_the_weight_of_the_reading(self):
+        for base, _, readings, g in graphs():
+            rev = list(g.subjects(RDF.predicate, OGHAM.readingOf))
+            self.assertEqual(len(rev), len(readings), base)
+            fwd = {(str(g.value(s, RDF.object)), str(g.value(s, AMT.weight)))
+                   for s in g.subjects(FW.derivedFrom, None)}
+            back = {(str(g.value(s, RDF.subject)), str(g.value(s, AMT.weight))) for s in rev}
+            self.assertEqual(fwd, back, base)
+
     def test_every_role_has_exactly_one_domain(self):
         _, _, _, g = next(graphs())
         for role in g.subjects(RDF.type, AMT.Role):

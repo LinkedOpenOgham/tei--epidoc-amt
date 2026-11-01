@@ -6,7 +6,7 @@ title: Model
 
 # Model
 
-The model has four concepts (stone, inscription, reading, editor), seven roles and one plain link
+The model has four concepts (stone, inscription, reading, editor), eight roles and one plain link
 (`hasInscription`, written only for records with several inscriptions). Five axioms say what the engine can
 derive from the weighted statements: an edition reading and a historical reading are readings (subsumption), and
 a stone, or its inscription, is read by the editor of its reading (role chain, with product logic). The page
@@ -40,7 +40,7 @@ Source: [PNG](diagrams/06_axioms.png), drawn by `py/step_diagrams.py` from the d
 
 ## One statement as a hextuple
 
-AMT stores a weighted statement as a reified triple plus the weight. Release 0.5.0 adds the
+AMT stores a weighted statement as a reified triple plus the weight. Release 0.6.0 adds the
 three annotations of the hextuple of AMT.engine 0.6.0: the type of the doubt, the method that produced the
 weight, and the evidence it was derived from. The quadruple core (subject, predicate, object, weight) is
 unchanged; the committed Turtle of release 0.1 and the new Turtle agree on every quadruple.

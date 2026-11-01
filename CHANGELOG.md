@@ -3,6 +3,30 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.0] - 2026-11-01
+
+Review of the axioms (PRIMER D12) and a fix for the Windows console.
+
+### Added
+- **Role `ogham:readingOf`** (reading to stone, or to inscription where a record has several): the other direction
+  of `hasReading` and `hasInscriptionReading`, written next to every such statement with the same weight (IRI
+  `rev_...`). The engine has no inverse axiom, so it is asserted, not derived. *Proposed term.*
+- Test: one reverse statement per reading, with the weight of the forward statement.
+
+### Changed
+- `step_reason` and `step_check` start the runner with `PYTHONUTF8=1` and read its output as UTF-8. On Windows
+  (cp1252) the runner stopped at the final check mark after it had written all outputs, so `reason` reported
+  seven failed graphs although every output was there.
+- Eight roles (was seven) in the model text.
+
+### Decided (no change to the graphs)
+- No stone-level `readByEditor` for records with several inscriptions: the weights are shares per inscription.
+- No sub-roles for inscriptions: one role `hasInscriptionReading`.
+- Plain roles without further properties; disjointness stays as it is.
+
+### Unchanged
+- Rule v1 and v2 and every weight and type.
+
 ## [0.5.0] - 2026-11-01
 
 Gives the graphs axioms, so that the AMT engine has something to derive. Checked with the engine (commit `85f8f94`).

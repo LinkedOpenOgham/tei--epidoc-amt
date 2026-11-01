@@ -22,7 +22,7 @@ IDEA = """1. **One statement per reading.** The stone is linked to each reading 
    by uncertainty or by both, using the three types of the
    [Fuzziness-Wobbliness ontology](https://github.com/alpaca-fair-framework/FW_Ontology)."""
 
-MODEL_NOTE = """The model has four concepts (stone, inscription, reading, editor), seven roles and one plain link
+MODEL_NOTE = """The model has four concepts (stone, inscription, reading, editor), eight roles and one plain link
 (`hasInscription`, written only for records with several inscriptions). Five axioms say what the engine can
 derive from the weighted statements: an edition reading and a historical reading are readings (subsumption), and
 a stone, or its inscription, is read by the editor of its reading (role chain, with product logic). The page

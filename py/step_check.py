@@ -13,6 +13,7 @@ outside build/. The report is build/check-report.txt.
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -38,7 +39,8 @@ def run() -> int:
     for base, ttl in graphs:
         cmd = [sys.executable, str(runner / "run_amt.py"), str(ttl), "--check-only", "--update"]
         print(f"\n== {base}")
-        p = subprocess.run(cmd, capture_output=True, text=True)
+        p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                           env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"})
         print(p.stdout + p.stderr)
         report.append(f"== {base}  exit {p.returncode}\n{p.stdout}{p.stderr}")
         failed += p.returncode != 0

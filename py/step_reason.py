@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import csv
 import shutil
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -42,7 +43,8 @@ def run() -> int:
         cmd = [sys.executable, str(runner / "run_amt.py"), str(OUT / f"{base}.amt.ttl"), "--no-info",
                "--outdir", str(target), "--update"]
         print(f"\n== {base}")
-        p = subprocess.run(cmd, capture_output=True, text=True)
+        p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                           env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"})
         print(p.stdout + p.stderr)
         failed += p.returncode != 0
         lines.append(f"== {base}  exit {p.returncode}")

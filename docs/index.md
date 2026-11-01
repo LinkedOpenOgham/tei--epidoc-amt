@@ -6,7 +6,7 @@ title: Linked Open Ogham: AMT
 
 # Linked Open Ogham: AMT
 
-> **Status: prototype, release 0.5.0.** The model is small on purpose. What is verified and what is still open is stated on the page [Run](run.html).
+> **Status: prototype, release 0.6.0.** The model is small on purpose. What is verified and what is still open is stated on the page [Run](run.html).
 
 Ogham stones are read differently by different editors. This repository turns the
 competing readings of seven stones, as they stand in the OG(H)AM EpiDoc files, into **weighted statements** in

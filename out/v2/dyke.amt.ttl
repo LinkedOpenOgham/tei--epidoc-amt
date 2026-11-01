@@ -18,6 +18,11 @@ data:kind_S_MOR_001_OGHAM_LH amt:weight 1.0000 ;
     rdf:predicate ogham:hasEditionReading ;
     rdf:subject data:stone_S_MOR_001 .
 
+data:rev_S_MOR_001_OGHAM_LH amt:weight 1.0000 ;
+    rdf:object data:stone_S_MOR_001 ;
+    rdf:predicate ogham:readingOf ;
+    rdf:subject data:reading_S_MOR_001_OGHAM_LH .
+
 data:stmt_S_MOR_001_OGHAM_LH amt:weight 1.0000 ;
     fw:derivedFrom data:evidence_S_MOR_001_OGHAM_LH ;
     fw:hasMethod ogham:ConfidenceCertAgreementRule ;
@@ -100,13 +105,16 @@ ogham:readByEditor a amt:Role ;
     skos:definition "The weight the readings of the editor carry for the stone: derived by axiom ogham:AX_readByEditor from hasReading and attributedTo." ;
     skos:scopeNote "Never asserted in the graphs; it appears only when the engine reasons. If one editor has several readings of a stone, the engine keeps the largest weight." .
 
+ogham:readingOf a amt:Role ;
+    rdfs:label "reading of" ;
+    rdfs:domain ogham:Reading ;
+    rdfs:range ogham:OghamStone ;
+    skos:definition "The reading is a reading of this stone, or of this inscription where a record has several. The other direction of hasReading and hasInscriptionReading, with the same weight." ;
+    skos:scopeNote "Written next to every hasReading or hasInscriptionReading statement, because the engine has no inverse axiom. The range is the stone; for a record with several inscriptions the object is the inscription." .
+
 data:agent_OGHAM_LH a prov:Agent ;
     rdfs:label "OG(H)AM edition (LH)" ;
     amt:instanceOf ogham:Editor .
-
-data:stone_S_MOR_001 rdfs:label "Dyke (S-MOR-001)" ;
-    amt:instanceOf ogham:OghamStone ;
-    ogham:recordStatus "numbered" .
 
 ogham:hasHistoricalReading a amt:Role ;
     rdfs:label "has historical reading" ;
@@ -115,9 +123,9 @@ ogham:hasHistoricalReading a amt:Role ;
     skos:definition "The stone is read this way by an earlier editor, as the apparatus records it. A kind of hasReading (axiom ogham:AX_historicalIsReading)." ;
     skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
 
-data:reading_S_MOR_001_OGHAM_LH rdfs:label "[---]RRMOQQDITTOSSS[---] [---]EDDARRNON V[---]THIHAL[---]IRR[---]UIBUZ[---] SONSELCCO[---]" ;
-    amt:instanceOf ogham:Reading ;
-    prov:wasAttributedTo data:agent_OGHAM_LH .
+data:stone_S_MOR_001 rdfs:label "Dyke (S-MOR-001)" ;
+    amt:instanceOf ogham:OghamStone ;
+    ogham:recordStatus "numbered" .
 
 ogham:Inscription a amt:Concept ;
     rdfs:label "Inscription" ;
@@ -137,6 +145,10 @@ ogham:hasEditionReading a amt:Role ;
     rdfs:range ogham:Reading ;
     skos:definition "The stone is read this way in the current edition of the OG(H)AM team. A kind of hasReading (axiom ogham:AX_editionIsReading)." ;
     skos:scopeNote "Carries the same weight as the hasReading statement for the same reading." .
+
+data:reading_S_MOR_001_OGHAM_LH rdfs:label "[---]RRMOQQDITTOSSS[---] [---]EDDARRNON V[---]THIHAL[---]IRR[---]UIBUZ[---] SONSELCCO[---]" ;
+    amt:instanceOf ogham:Reading ;
+    prov:wasAttributedTo data:agent_OGHAM_LH .
 
 ogham:Editor a amt:Concept ;
     rdfs:label "Editor" ;
