@@ -13,7 +13,7 @@ from pathlib import Path
 
 from rdflib import Namespace
 
-RELEASE = "0.6.0"
+RELEASE = "0.7.0"
 
 GITHUB = "https://github.com/LinkedOpenOgham/tei--epidoc-amt"
 BLOB = GITHUB + "/blob/main/"

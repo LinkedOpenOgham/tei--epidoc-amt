@@ -24,7 +24,7 @@ to run the check yourself.
 The SHACL shapes of the AMT engine are not part of the default build, because they live in the engine
 repository. The runner applies them in the next step.
 
-The engine itself was run on these graphs for release 0.6.0 (see the PRIMER, S3): validation passes, the
+The engine itself was run on these graphs for release 0.7.0 (see the PRIMER, S3): validation passes, the
 diagnostics report nothing, and reasoning derives the editor edges described below.
 
 ## Check with the AMT runner

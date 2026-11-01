@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "tei--epidoc-amt: competing readings of ogham stones as weighted AMT statements"
-version: 0.6.0
+version: 0.7.0
 date-released: 2026-11-01
 license: MIT
 repository-code: "https://github.com/LinkedOpenOgham/tei--epidoc-amt"

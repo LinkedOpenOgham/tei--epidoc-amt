@@ -3,6 +3,24 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.7.0] - 2026-11-01
+
+Prepares the proposal for the FW ontology and the note for the OG(H)AM team. The graphs and weights are unchanged.
+
+### Added
+- `proposals/fw-ontology-pr.md`: what goes into the pull request to `caa-datadragons/FW_Ontology` (only what other
+  projects can use: `fw:ProportionalShareRule`, two clearer comments, a real example), what stays in `ogham:`, and
+  the text of the pull request.
+- `feedback/ogham-team-source-attribute.md`: a note for the OG(H)AM team that asks for `@source` on three readings
+  of Blackwaterfoot 1 (`JAC1973` twice, `FOR1996` once).
+
+### Fixed
+- Three readings of Blackwaterfoot 1 have no `@source`, not four: the stone note and the README said four, and so
+  did the entry of 0.3.0 below. The graphs were right.
+
+### Unchanged
+- Every graph, weight, type and axiom. Release 0.7.0 changes only the version, the texts and two new folders.
+
 ## [0.6.0] - 2026-11-01
 
 Review of the axioms (PRIMER D12) and a fix for the Windows console.

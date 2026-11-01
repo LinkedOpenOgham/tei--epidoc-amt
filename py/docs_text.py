@@ -152,8 +152,8 @@ which ("For the second inscription, ..."). Each inscription with a reading is it
 readings of the first inscription are not alternatives of the second. The third inscription is commented
 out in the file and the fourth has no text and no reading, so neither has a statement.
 
-Four of the apparatus readings have no `@source`; the note names the editor in prose (for example Jackson
-1973), but the graph does not parse prose, so these readings have no `prov:wasAttributedTo`. The two readings
+Three of the apparatus readings have no `@source`; the note names the editor in prose (Jackson 1973 for two,
+Forsyth 1996 for the third), but the graph does not parse prose, so these readings have no `prov:wasAttributedTo`. The two readings
 of `FOR1996` on the second inscription are two nodes in this graph.""",
     "bishop-loch": """The record has no CIIC number; its identifier carries the series letter X, which the sister
 repository [tei--epidoc-crosswalk](https://github.com/LinkedOpenOgham/tei--epidoc-crosswalk) exports as

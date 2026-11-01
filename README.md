@@ -53,7 +53,7 @@ Seven stones form a deliberate **spectrum of doubt**:
 | Garranes | 81 | 1 | single reading, weight 1.0 (minor restorations) |
 | Ballinrannig 6 | 153 | 1 | single reading, weight 1.0 (no doubt markup) |
 | Dyke | – (`S-MOR-001`) | 1 | single reading, weight 1.0; the edition is marked `cert="low"`, which the rule does not read |
-| Blackwaterfoot 1 | – (`S-BUT-001`) | 4 + 4, per inscription | two inscriptions, each weighted on its own; four readings have no named editor |
+| Blackwaterfoot 1 | – (`S-BUT-001`) | 4 + 4, per inscription | two inscriptions, each weighted on its own; three readings have no named editor |
 | Bishop Loch | – (`S-LKS-X01`) | 1 | single reading, weight 1.0; the doubt about the object is in prose only (the limit of the method) |
 
 A record without a CIIC number is named by its file name. A file that holds
@@ -69,11 +69,13 @@ attributed to anyone.
 tei--epidoc-amt/
 ├── data/                      # inputs (EpiDoc XML), unchanged
 ├── ontology/
-│   └── ogham-amt.ttl          # the domain model: 4 concepts, 7 roles, 1 link, 2 methods, 5 axioms
+│   └── ogham-amt.ttl          # the domain model: 4 concepts, 8 roles, 1 link, 2 methods, 5 axioms
 ├── out/                       # generated outputs
 │   ├── README.md              # extraction, scores, c, AMT modelling (generated)
 │   ├── *.amt.ttl              # one AMT graph per stone, rule v1 (generated)
 │   └── v2/*.amt.ttl           # the same under rule v2 (generated)
+├── proposals/                 # the proposal for the FW ontology (pull request text)
+├── feedback/                  # a note for the OG(H)AM team (drafts, not sent)
 ├── docs/                      # GitHub Pages: model, vocabulary, weights, stones, run
 │   ├── _config.yml, _layouts/, assets/    # Jekyll shell and logo (sources)
 │   └── *.md, diagrams/        # generated

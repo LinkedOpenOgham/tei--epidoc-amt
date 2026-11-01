@@ -86,7 +86,7 @@ Eigenschaften, die das Ergebnis haben muss:
 | Axiome (S3) | Fünf Axiome, in der Ontologie, in jedem Graphen mitgeführt; Subsumtionen `hasEditionReading`/`hasHistoricalReading` ⊑ `hasReading`, Rollenketten `hasReading` ∘ `attributedTo` ⟹ `readByEditor` (und für Inschriften), Disjunktheit der beiden Unterrollen. Beschluss Flo 2026-11-01; Inhalt Vorschlag, Review D12. | 2026-11-01 |
 | Proxy für historische Lesungen (S5) | bleibt (Regel v1/v2 vergleichbar); Zeichenwerte ggf. später als Regel v3 | 2026-11-01 (Flo) |
 | Paper/Poster-Abbildungen (D5) | Entscheidung im Poster-Chat; die Paper bleiben unverändert | 2026-11-01 (Flo) |
-| Release/Zenodo, FW-Ontologie (S6/S7) | erst Check und Review, dann Release; FW-Vorschlag danach | 2026-11-01 (Flo) |
+| Release/Zenodo, FW-Ontologie (S6/S7) | S6 als PR-Vorbereitung, nur Generisches (Flo 2026-11-01); S7 zurückgestellt, es bleibt bei Tags | 2026-11-01 (Flo) |
 | `<rdg>` ohne `@source` (D8) | bleibt ohne Agent; Rückmeldung ans OG(H)AM-Team (`@source` ergänzen) | 2026-11-01 (Flo) |
 | Datenlizenz (D3) | CC BY 4.0, so in `<licence>` jedes EpiDoc-Headers erklärt; README nennt es | 2026-11-01 |
 | Tags | v0.1.0 = `51072be`, v0.2.0 = `86705fc`, v0.2.1 = `ae78c69`, v0.3.0 = `dd11430`, v0.4.0 = der Commit dieses Patches | 2026-11-01 (Flo) |
@@ -116,8 +116,8 @@ Nicht hochladen: `.venv/`, `.git/`, `build/`, die Abbildungen in `docs/diagrams/
 | S3 | Axiome | tei--epidoc-amt | S2 | erledigt 2026-11-01 (als Vorschlag, Review offen) |
 | S4 | Einzel-Lesungen: Gewicht und c | tei--epidoc-amt | S1 | erledigt 2026-10-30 (Beschluss: v1 bleibt) |
 | S5 | c(r) historischer Lesungen pro Zeichen | tei--epidoc-amt | S1 | offen |
-| S6 | Methode in die FW-Ontologie | FW_Ontology | S1 | offen |
-| S7 | Release, Zenodo, Pages | tei--epidoc-amt | S2 | offen |
+| S6 | Methode in die FW-Ontologie | FW_Ontology | S1 | Vorschlag und Patch für den PR fertig 2026-11-01 (`proposals/fw-ontology-pr.md`); PR von Flo zu öffnen |
+| S7 | Release, Zenodo, Pages | tei--epidoc-amt | S2 | zurückgestellt: erst Tags (Beschluss Flo 2026-11-01) |
 | S8 | Drei Steine aufnehmen (Dyke, Blackwaterfoot 1, Bishop Loch), je Inschrift lesen | tei--epidoc-amt | | erledigt 2026-11-01 |
 | S9 | Regel v2 (`@cert` mit GSAS-Graden), `recordStatus`, Tags | tei--epidoc-amt | S8 | erledigt 2026-11-01 |
 
@@ -185,9 +185,9 @@ Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt
 
 ## S6 — Methode in die FW-Ontologie
 
-**Ziel:** `ConfidenceAgreementRule` als Individuum in `FW_Ontology`, damit kein Repo-eigener Namensraum nötig ist.
+**Ziel (angepasst 2026-11-01):** Nur Generisches in die FW-Ontologie. `ConfidenceAgreementRule` bleibt in `ogham:` und zeigt per `skos:broadMatch` auf das neue allgemeine Individuum `fw:ProportionalShareRule`. Dazu zwei klarere Kommentare (`fw:hasType`, `fw:RuleBasedMethod`) und ein Beispiel mit echten Daten (Gigha 1). Rollen, Axiome und Ogham-Begriffe bleiben im eigenen Namensraum.
 
-**Abnahme:** Individuum in der FW-Ontologie, `fw:hasMethod` im Graphen zeigt auf die w3id-IRI.
+**Abnahme:** PR in `caa-datadragons/FW_Ontology` geöffnet; `python main.py` dort baut ohne neue Warnung. Text und Gründe: `proposals/fw-ontology-pr.md`.
 
 ## S7 — Release
 
@@ -248,7 +248,7 @@ Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt
 - **D4 erledigt** (2026-11-01): ORCID und Affiliation in `CITATION.cff`.
 - **D5 Papiere.** ArcheoFOSS (Jahr bitte bestätigen, im Chat stand 2025) und UK CAA: Welche Abbildungen kommen hinein (Vorschlag: `02_hextuple`, `04_gigha`, `05_spectrum`), und wird die Grenze des Anteil-Modells (D1) dort diskutiert? Vorschlag: ja, in einem Satz.
 - **D7 erledigt** (S9). Früher: `ogham:recordStatus` im AMT-Graphen? Der Crosswalk exportiert X/L-Status und Zweifelsprofil am Stein; hier fehlt beides. Für das Poster könnte eine Abfrage über beide Repos reichen. Falls nicht: Status aus dem Bezeichner in `ogham-amt.ttl` aufnehmen (gleicher Begriff, gleicher Vorschlag-Status).
-- **D8 entschieden** (ohne Agent, siehe A4; offen bleibt nur die Rückmeldung ans OG(H)AM-Team). Quelle der `<rdg>` ohne `@source`. Vier Lesungen bei Blackwaterfoot 1 nennen den Bearbeiter nur in der Prosa (Jackson 1973, Forsyth 1996). Entweder die Daten ergänzen (`@source` im OG(H)AM-Repo, Rückmeldung an das OG(H)AM-Team, `lguariento/og-h-am`) oder bewusst ohne Agent lassen.
+- **D8 entschieden** (ohne Agent, siehe A4; die Rückmeldung ans OG(H)AM-Team ist als Entwurf da: `feedback/ogham-team-source-attribute.md`, zu senden von Flo). Quelle der `<rdg>` ohne `@source`. Drei Lesungen bei Blackwaterfoot 1 nennen den Bearbeiter nur in der Prosa (Jackson 1973, Forsyth 1996). Entweder die Daten ergänzen (`@source` im OG(H)AM-Repo, Rückmeldung an das OG(H)AM-Team, `lguariento/og-h-am`) oder bewusst ohne Agent lassen.
 - **D9 erledigt** (S9, Regel v2). Früher: `@cert` an der Edition. Gigha 1 und Dyke tragen `cert="low"`; Regel v1 liest es nicht. Soll `cert` in c(r) eingehen (Regel v2, eigenes Methoden-Individuum)? Verwandt mit D2 und mit der Grenze bei Bishop Loch.
 - **D10 erledigt** (S3): Die Engine lehnte `hasReading` ohne Domain ab („Each Role must have exactly one rdfs:domain“). Domain `OghamStone` ist zurück, Inschriften haben die eigene Rolle `hasInscriptionReading`.
 - **D12 Review der Axiome (entschieden 2026-11-01, Patch 0.6.0).** Inverse `readingOf`: ja, als geschriebene Aussage mit gleichem Gewicht (die Engine kennt kein Inverse-Axiom); keine Kette Stein → Inschrift → Editor (Gewichte sind Anteile je Inschrift); keine Unterrollen für Inschriften; keine weiteren Rolleneigenschaften. Ursprüngliche Frage: Sind `readByEditor` (Anteil eines Editors am Stein, mit Maximum bei mehreren Lesungen) und die Subsumtionen die Ableitungen, die wir wollen? Mögliche Erweiterungen: Inverse (`readingOf`), Kette über `hasInscription`, Axiome für Unterrollen der Inschriften.
