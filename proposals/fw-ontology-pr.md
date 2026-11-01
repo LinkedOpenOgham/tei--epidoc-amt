@@ -1,6 +1,6 @@
 # Proposal for the FW ontology (PR to `caa-datadragons/FW_Ontology`)
 
-**Status:** prepared in release 0.7.0 of `tei--epidoc-amt`; the patch for the FW repository is delivered
+**Status:** pull request opened: https://github.com/caa-datadragons/FW_Ontology/pull/3 . Prepared in release 0.7.0 of `tei--epidoc-amt`; the patch for the FW repository is delivered
 separately (`fw-ontology-ogham-patch.zip`) and is applied there on a branch. This page records the decision and
 the reasons, so that it is not lost when the PR is merged or changed.
 

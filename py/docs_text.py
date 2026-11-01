@@ -97,7 +97,7 @@ They add up to 1 by construction. Two consequences follow, and both are intended
 An independent degree for a single reading would need a different rule. That is not part of this release;
 the decision and its reason are recorded in the PRIMER (A4, 2026-10-30).
 
-Two more things the weight does not say, both visible in the stones of release 0.3.0:
+Three more things the weight does not say, visible in the stones of releases 0.3.0 and 0.7.1:
 
 - **It reads the markup of the reading, not the status of the object.** Bishop Loch carries one reading
   with two `<gap>` elements, so its weight is 1.0000 and its type `fw:Vagueness`. Whether the object is an
@@ -106,6 +106,14 @@ Two more things the weight does not say, both visible in the stones of release 0
 - **Rule v1 does not read `@cert` on the edition.** The edition of Gigha 1 and of Dyke carries `cert="low"`
   on its `<div>`. Rule v1 counts `unclear`, `supplied` and `gap` and ignores the attribute, so the
   doubt the editors put on the whole edition is not in c(r). Rule v2 reads it (next section).
+- **The confidence of a historical reading is a proxy.** c(r) of an apparatus reading is the share of its
+  characters that are not editor-marked (`[ ] ( ) ? / \\ - . :`). The 11 apparatus readings of the stones carry
+  no per-character certainty that could replace it: seven are plain strings (c = 1), one has editor marks
+  (Blackwaterfoot 1, `H(i/e)OMEQ(i/e)[~]`, c = 0.56), two hold two alternatives in one string ("A or B", c = 1),
+  and one has `<supplied>` markup that the proxy does not read (Coomleagh East, Macalister 1945, c = 1). A doubt
+  that Forsyth states in a note, such as "the first six letters are extremely doubtful" (Gigha 1), is about the
+  edition and not about an earlier reading. A c(r) per character would therefore be invented; the proxy stays
+  and is called one (PRIMER, S5).
 
 ## Rule v2: the certainty of the edition
 

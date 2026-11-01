@@ -84,11 +84,11 @@ Eigenschaften, die das Ergebnis haben muss:
 | `ogham:recordStatus` im AMT-Graphen | am Stein-Knoten, wie im Crosswalk (numbered/lost/doubtful aus dem Bezeichner); ändert kein Gewicht | 2026-11-01 (Flo) |
 | Typzuordnung (D2) | c<1 Vagueness, a<1 Uncertainty bleibt; Bishop Loch behält Vagueness (Objekt-Zweifel ist die dokumentierte Grenze, kein Typ) | 2026-11-01 (Flo) |
 | Axiome (S3) | Fünf Axiome, in der Ontologie, in jedem Graphen mitgeführt; Subsumtionen `hasEditionReading`/`hasHistoricalReading` ⊑ `hasReading`, Rollenketten `hasReading` ∘ `attributedTo` ⟹ `readByEditor` (und für Inschriften), Disjunktheit der beiden Unterrollen. Beschluss Flo 2026-11-01; Inhalt Vorschlag, Review D12. | 2026-11-01 |
-| Proxy für historische Lesungen (S5) | bleibt (Regel v1/v2 vergleichbar); Zeichenwerte ggf. später als Regel v3 | 2026-11-01 (Flo) |
+| Proxy für historische Lesungen (S5) | bleibt und heißt in den Docs Proxy. Die 11 Apparatus-Lesungen tragen keine Zeichen-Sicherheit; eine Regel v3 wäre erfunden. Die Variante "Lesung mit `<supplied>` nach der Edition-Regel" (nur Coomleagh East, c 1.00 → 0.84) ist verworfen. | 2026-11-01 (Flo) |
 | Paper/Poster-Abbildungen (D5) | Entscheidung im Poster-Chat; die Paper bleiben unverändert | 2026-11-01 (Flo) |
-| Release/Zenodo, FW-Ontologie (S6/S7) | S6 als PR-Vorbereitung, nur Generisches (Flo 2026-11-01); S7 zurückgestellt, es bleibt bei Tags | 2026-11-01 (Flo) |
+| Release/Zenodo, FW-Ontologie (S6/S7) | S6 als PR (https://github.com/caa-datadragons/FW_Ontology/pull/3), nur Generisches (Flo 2026-11-01); S7 zurückgestellt, es bleibt bei Tags | 2026-11-01 (Flo) |
 | `<rdg>` ohne `@source` (D8) | bleibt ohne Agent; Rückmeldung ans OG(H)AM-Team (`@source` ergänzen) | 2026-11-01 (Flo) |
-| Datenlizenz (D3) | CC BY 4.0, so in `<licence>` jedes EpiDoc-Headers erklärt; README nennt es | 2026-11-01 |
+| Datenlizenz (D3) | CC BY 4.0, so in `<licence>` jedes EpiDoc-Headers erklärt; README nennt es. Logo: eigenes Werk, CC BY 4.0 | 2026-11-01 |
 | Tags | v0.1.0 = `51072be`, v0.2.0 = `86705fc`, v0.2.1 = `ae78c69`, v0.3.0 = `dd11430`, v0.4.0 = der Commit dieses Patches | 2026-11-01 (Flo) |
 | Docs | Jekyll in `docs/`, Farben #004c55 / #0090a2 und Logo aus `LinkedOpenOgham/logo` | 2026-10-30 |
 | Release-Nummer | 0.3.0 (0.2.0 und 0.2.1 am 2026-10-30; 0.1.0 für den Stand davor rückwirkend benannt) | Vorschlag 2026-10-30 |
@@ -115,7 +115,7 @@ Nicht hochladen: `.venv/`, `.git/`, `build/`, die Abbildungen in `docs/diagrams/
 | S2 | Engine-/Runner-Check | tei--epidoc-amt | S1 | erledigt 2026-11-01 (Sandbox; lokal zu bestätigen) |
 | S3 | Axiome | tei--epidoc-amt | S2 | erledigt 2026-11-01 (als Vorschlag, Review offen) |
 | S4 | Einzel-Lesungen: Gewicht und c | tei--epidoc-amt | S1 | erledigt 2026-10-30 (Beschluss: v1 bleibt) |
-| S5 | c(r) historischer Lesungen pro Zeichen | tei--epidoc-amt | S1 | offen |
+| S5 | c(r) historischer Lesungen pro Zeichen | tei--epidoc-amt | S1 | geprüft und geschlossen 2026-11-01: die Daten tragen keine Zeichenwerte, der Proxy bleibt |
 | S6 | Methode in die FW-Ontologie | FW_Ontology | S1 | Vorschlag und Patch für den PR fertig 2026-11-01 (`proposals/fw-ontology-pr.md`); PR von Flo zu öffnen |
 | S7 | Release, Zenodo, Pages | tei--epidoc-amt | S2 | zurückgestellt: erst Tags (Beschluss Flo 2026-11-01) |
 | S8 | Drei Steine aufnehmen (Dyke, Blackwaterfoot 1, Bishop Loch), je Inschrift lesen | tei--epidoc-amt | | erledigt 2026-11-01 |
@@ -244,7 +244,7 @@ Beschluss: Regel v1 bleibt, Gewichte sind Anteile. Umgesetzt in 0.2.1: Abschnitt
 
 - **D1 erledigt** (2026-10-30, siehe A4 und S4). Für die Paper: die Grenze des Anteil-Modells offen ansprechen.
 - **D2 entschieden** (2026-11-01, A4). Früher: Zuordnung der Faktoren zu den Typen. Ist "markierte Zeichen" wirklich Vagueness und "Dissens der Editoren" wirklich Uncertainty? Das ist eine inhaltliche Entscheidung, die gegengeprüft werden sollte (FW-Ontologie, Samian-Beispiel).
-- **D3 Datenlizenz erledigt** (CC BY 4.0, siehe A4); offen bleibt die Lizenz des Logos. Früher: Datenlizenz der EpiDoc-Eingaben (OG(H)AM-Projekt) und Lizenz des Logos fehlen. Die Docs binden das Logo ein.
+- **D3 Datenlizenz erledigt** (CC BY 4.0, siehe A4); die Lizenz des Logos ist entschieden (CC BY 4.0). Logo: eigenes Werk, CC BY 4.0 (Flo 2026-11-01). Früher: Datenlizenz der EpiDoc-Eingaben (OG(H)AM-Projekt) und Lizenz des Logos fehlen. Die Docs binden das Logo ein.
 - **D4 erledigt** (2026-11-01): ORCID und Affiliation in `CITATION.cff`.
 - **D5 Papiere.** ArcheoFOSS (Jahr bitte bestätigen, im Chat stand 2025) und UK CAA: Welche Abbildungen kommen hinein (Vorschlag: `02_hextuple`, `04_gigha`, `05_spectrum`), und wird die Grenze des Anteil-Modells (D1) dort diskutiert? Vorschlag: ja, in einem Satz.
 - **D7 erledigt** (S9). Früher: `ogham:recordStatus` im AMT-Graphen? Der Crosswalk exportiert X/L-Status und Zweifelsprofil am Stein; hier fehlt beides. Für das Poster könnte eine Abfrage über beide Repos reichen. Falls nicht: Status aus dem Bezeichner in `ogham-amt.ttl` aufnehmen (gleicher Begriff, gleicher Vorschlag-Status).

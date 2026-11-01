@@ -3,6 +3,21 @@
 All notable changes to this repository. Dates are release dates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.7.1] - 2026-11-01
+
+Closes S5 without new rules, and records the licence of the logo and the pull request. The graphs are unchanged.
+
+### Changed
+- Page "Weights": the confidence of a historical reading is called a proxy, with the reason. The 11 apparatus
+  readings carry no per-character certainty (seven plain strings, one with editor marks, two with "A or B" in one
+  string, one with `<supplied>` markup). A rule v3 with per-character values would be invented, so there is none.
+- README: the logo is the author's own work, CC BY 4.0; the TODO list no longer lists decided points.
+- PRIMER: S5 closed; the variant "a reading with `<supplied>` is scored by the edition rule" (Coomleagh East only) is
+  rejected; the pull request to `FW_Ontology` is linked (S6, PR #3).
+
+### Unchanged
+- Every graph, weight, type and axiom (`out/` is byte-identical to 0.7.0).
+
 ## [0.7.0] - 2026-11-01
 
 Prepares the proposal for the FW ontology and the note for the OG(H)AM team. The graphs and weights are unchanged.

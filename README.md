@@ -219,7 +219,8 @@ once the OG(H)AM team un-comments them.
 ## Data licence
 
 The OG(H)AM editions in `data/` declare **CC BY 4.0** in their `<licence>` element
-(teiHeader). The code in this repository is MIT (`LICENSE`).
+(teiHeader). The code in this repository is MIT (`LICENSE`). The Linked Open Ogham logo in `docs/assets/` is
+the author's own work and licensed **CC BY 4.0**.
 
 ## Context
 
@@ -238,7 +239,6 @@ Florian Thiery. Code licensed under the **MIT License** (see `LICENSE`).
 
 ## TODO (to fill before publishing)
 
-- Zenodo DOI (`CITATION.cff` is in place; add the DOI after the first release)
-- Data licence / attribution for the EpiDoc input (OG(H)AM project)
-- ORCID / affiliation
-- Replace the c(r) proxy for historical readings with per-character certainty
+- Zenodo DOI (`CITATION.cff` is in place; add the DOI after the first release; release 0.7.1 is tagged only)
+- Open: the c(r) of historical readings stays a proxy, because the data hold no per-character certainty
+  (PRIMER, S5, closed)
